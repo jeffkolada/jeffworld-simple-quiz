@@ -1,0 +1,15 @@
+{
+  "id": "jeffworldquiz",
+  "name": "Simple Quiz",
+  "version": "1.0.0",
+  "beta": true,
+  "pluginType": "Business",
+  "description": "A simple quiz component",
+  "longDescription": "A simple quiz component",
+  "configuration": "Configure in component settings",
+  "category": "Games",
+  "businessId": "hCsur3Hk00",
+  "price": 0,
+  "releaseNotes": "N/A",
+  "entrypoint": ""
+}
