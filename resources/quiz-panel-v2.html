@@ -5,46 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        body {
-    background-color: #d5d5d5;
-  }
+      body {
+          background-color: #000000;
+          color: aliceblue;
+          margin: 0;
+          padding: 25px; /* Add padding to the body */
+          box-sizing: border-box; /* Include padding in the body's total width and height */
+          height: 100vh; /* Full viewport height */
+      }
+    
+      .quiz-container {
+          box-sizing: border-box;
+          width: calc(100% - 50px); /* Adjust width to account for body padding */
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 2em;
+          background-color: #191919;
+          border-radius: 20px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          height: calc(100% - 50px); /* Adjust height to account for body padding */
+          display: flex;
+          flex-direction: column; /* Stack children vertically */
+      }
   
-  .quiz-container {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 2em;
-    background-color: white;
-    border-radius: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .choices {
-    display: flex;
-  }
+      .choices {
+          display: flex;
+      }
+    
+      .choice {
+          font-size: 1em;
+          display: block;
+          margin: 5px 5px;
+          padding: .5em .75em;
+          background-color: #393939;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+      }
+    
+      .choice:hover {
+          background-color: #4a5056;
+      }
+      .feedback {
+        text-align: center;
+      }
+      .quiz-title {
+        text-align: center;
+      }
+  </style>
   
-  .choice {
-    font-size: 1em;
-    display: block;
-    margin: 5px 5px;
-    padding: .5em .75em;
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .choice:hover {
-    background-color: #2980b9;
-  }
-  
-    </style>
 </head>
 <body>
   <div class="quiz-container">
-    <h1>Sample Quiz</h1>
+    <h1 id="quiz-title"></h1>
     <div class="question">
       <p id="question-text"></p>
       <div class="choices">
@@ -59,6 +73,11 @@
     window.addEventListener('message', (event) => {
         if (event.data.action === 'update-quiz') {
             questions = event.data.content; // Directly use the passed object
+            // Update the quiz title
+        const quizTitleElement = document.getElementById('quiz-title');
+        if (quizTitleElement) {
+            quizTitleElement.textContent = event.data.quizTitle;
+        }
             showQuestion(); // Refresh the displayed question
         }
     });
@@ -103,6 +122,7 @@ let questions = []; // Initialize as empty or with default questions
       }, 2000);
     }
 
+    
     // Variables to track the state of the quiz
     let currentQuestion = 0;
     let correctAnswers = 0;
