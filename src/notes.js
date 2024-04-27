@@ -18,7 +18,7 @@ window.addEventListener('message', function (e) {
 })
 
 
-// 3. Javascript Reaction Plugin
+// 3. Javascript Reaction (Base Plugin)
 
 async onMessage(data) {
     let userID = await this.plugin.user.getID()
@@ -30,7 +30,7 @@ if (data.action == 'still-breathing-sir') {
 }
 
 
-// Javascript Reaction Component
+// Javascript Reaction (Component)
 async onMessage(msg) {
 
     if (msg.action === 'still-breathing-sir') {
@@ -40,6 +40,7 @@ async onMessage(msg) {
 
 
 }
+
 
 
 

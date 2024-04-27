@@ -23,6 +23,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             ]
         });
     }
+    // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
         const analyticsKey = this.getField('analyticsKey');
 
