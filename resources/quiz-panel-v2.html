@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+    background-color: #d5d5d5;
+  }
+  
+  .quiz-container {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2em;
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .choices {
+    display: flex;
+  }
+  
+  .choice {
+    font-size: 1em;
+    display: block;
+    margin: 5px 5px;
+    padding: .5em .75em;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .choice:hover {
+    background-color: #2980b9;
+  }
+  
+    </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>Sample Quiz</h1>
+    <div class="question">
+      <p id="question-text"></p>
+      <div class="choices">
+        <button class="choice" onclick="checkAnswer(0)"></button>
+        <button class="choice" onclick="checkAnswer(1)"></button>
+        <button class="choice" onclick="checkAnswer(2)"></button>
+      </div>
+      <p id="feedback"></p>
+    </div>
+  </div>
+  <script>
+    window.addEventListener('message', (event) => {
+        if (event.data.action === 'update-quiz') {
+            questions = event.data.content; // Directly use the passed object
+            showQuestion(); // Refresh the displayed question
+        }
+    });
+
+
+let questions = []; // Initialize as empty or with default questions
+
+    // Function to show a question
+    function showQuestion() {
+      if (questions.length > 0 && currentQuestion < questions.length) {
+        const questionText = document.getElementById("question-text");
+        questionText.textContent = questions[currentQuestion].question;
+
+        const choices = document.querySelectorAll(".choice");
+        choices.forEach((choice, index) => {
+          choice.textContent = questions[currentQuestion].choices[index];
+        });
+
+        const feedback = document.getElementById("feedback");
+        feedback.textContent = "";
+      }
+    }
+
+    // Function to check answers
+    function checkAnswer(selected) {
+      const feedback = document.getElementById("feedback");
+      if (selected === questions[currentQuestion].correct) {
+        feedback.textContent = "Correct!";
+        correctAnswers++;
+      } else {
+        feedback.textContent = "Incorrect!";
+      }
+
+      setTimeout(() => {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          showQuestion();
+        } else {
+          const quizContainer = document.querySelector(".quiz-container");
+          quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions.</p>`;
+        }
+      }, 2000);
+    }
+
+    // Variables to track the state of the quiz
+    let currentQuestion = 0;
+    let correctAnswers = 0;
+  </script>
+</body>
+
+</html>
