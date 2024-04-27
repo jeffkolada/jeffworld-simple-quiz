@@ -17,6 +17,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             name: 'Quiz Component',
             description: 'Creates a multiple-choice quiz when the component is clicked.',
             settings: obj => [
+                { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.' },  // New setting for quiz title
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' }
             ]
         });
@@ -33,13 +34,14 @@ class QuizComponent extends BaseComponent {
         try {
             const questionsJson = this.getField('questions');
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
+            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
     
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
                 panel: {
                     iframeURL: this.paths.absolute('./quiz-panel-v2.html'),
                     width: 600,
-                    height: 500,
+                    height: 600,
                     onClose: () => {
                         console.log("Popup closed");
                     },
@@ -50,9 +52,10 @@ class QuizComponent extends BaseComponent {
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
                     content: questions, // Send already parsed object
+                    quizTitle: quizTitle,  // Include the quiz title in the message
                     popupID: popupId
                 });
-            }, 500); // Delaying the message to ensure the iframe is fully loaded
+            }, 250); // Delaying the message to ensure the iframe is fully loaded
     
             console.log('Popup ID:', popupId);
             console.log('Question Sent:', questions);
@@ -60,5 +63,7 @@ class QuizComponent extends BaseComponent {
             console.error('Error parsing questions:', error);
         }
     }
+
+    
 }
 
