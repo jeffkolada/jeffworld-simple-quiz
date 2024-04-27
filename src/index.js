@@ -55,7 +55,7 @@ class QuizComponent extends BaseComponent {
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     popupID: popupId
                 });
-            }, 250); // Delaying the message to ensure the iframe is fully loaded
+            }, 500); // Delaying the message to ensure the iframe is fully loaded
     
             console.log('Popup ID:', popupId);
             console.log('Question Sent:', questions);
