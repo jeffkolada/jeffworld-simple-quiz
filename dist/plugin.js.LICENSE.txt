@@ -1,0 +1,10 @@
+/**
+ * This is the main entry point for your plugin.
+ *
+ * All information regarding plugin development can be found at
+ * https://developer.vatom.com/spaces/plugins-in-spaces/guide-create-plugin
+ *
+ * @license MIT
+ * @author JEFFWORLD
+ * written by Jeff & AI
+ */
