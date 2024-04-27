@@ -1,12 +1,13 @@
 
 // JAVASCRIPT
 
-// Send from JS
+// 1. Plugin Send Message
 onTimer() {
     this.plugin.menus.postMessage({ action: 'are-you-alive'})
 }
 
-// Receive & Reply from HTML
+
+// 2. HTML Receive & Reply
 window.addEventListener('message', function (e) {
 
     // Open Check
@@ -17,10 +18,29 @@ window.addEventListener('message', function (e) {
 })
 
 
-// Reaction from JS
+// 3. Javascript Reaction Plugin
+
+async onMessage(data) {
+    let userID = await this.plugin.user.getID()
+
 if (data.action == 'still-breathing-sir') {
     this.editorResponseDate = Date.now()
 }
+
+}
+
+
+// Javascript Reaction Component
+async onMessage(msg) {
+
+    if (msg.action === 'still-breathing-sir') {
+        npc.sendMessage({fromInstance: userID, action: 'still-breathing-sir'}, true)
+        return
+    }
+
+
+}
+
 
 
 

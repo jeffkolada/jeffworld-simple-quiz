@@ -120,6 +120,10 @@
         } else {
           const quizContainer = document.querySelector(".quiz-container");
           quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions.</p>`;
+         
+          // Send the results to the parent window
+          parent.postMessage({ action: 'send-results', result: correctAnswers }, '*');
+          console.log('Show Results: ', correctAnswers);
         }
       }, 2000);
     }

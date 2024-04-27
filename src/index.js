@@ -17,11 +17,22 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             name: 'Quiz Component',
             description: 'Creates a multiple-choice quiz when the component is clicked.',
             settings: obj => [
-                { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.' },  // New setting for quiz title
-                { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' }
+                { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.' },  
+                { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' },
+                { id: 'analyticsKey', name: 'Analytics Key', type: 'text', help: 'Key for the analytics event.' } 
             ]
         });
     }
+    async onMessage(msg) {
+        const analyticsKey = this.getField('analyticsKey');
+
+        if (msg.action == 'send-results') {
+            let result = msg.result;
+            console.log('ReceivedResult: ', result);
+            this.user.sendAnalytics(analyticsKey, result)
+        }
+        
+        }
 }
 
 /**
@@ -35,6 +46,7 @@ class QuizComponent extends BaseComponent {
             const questionsJson = this.getField('questions');
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
             const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
+
     
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
