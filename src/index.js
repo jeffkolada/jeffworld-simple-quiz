@@ -23,17 +23,20 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             ]
         });
     }
+    
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-        const analyticsKey = this.getField('analyticsKey');
-
+        // Attempt to retrieve analyticsKey from the message; fallback to component's field if unavailable
+        let analyticsKey = msg.analytics || this.getField('analyticsKey');
+    
         if (msg.action == 'send-results') {
             let result = msg.result;
             console.log('ReceivedResult: ', result);
-            this.user.sendAnalytics(analyticsKey, result)
+            console.log('Sent to Analytics: ', analyticsKey, " : ", result);
+            this.user.sendAnalytics(analyticsKey, result);
         }
-        
-        }
+    }
+
 }
 
 /**
@@ -48,6 +51,7 @@ class QuizComponent extends BaseComponent {
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
             const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
 
+
     
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
@@ -61,10 +65,14 @@ class QuizComponent extends BaseComponent {
                 }
             });
     
+        // Send the quiz data to the panel
             setTimeout(() => {
+                const analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+                console.log('Analytics Key Sent:', analyticsKey);
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
-                    content: questions, // Send already parsed object
+                    content: questions,  // Send already parsed object
+                    analytics: analyticsKey, // Send analytics key
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     popupID: popupId
                 });
