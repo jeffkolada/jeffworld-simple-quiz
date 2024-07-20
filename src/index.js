@@ -23,16 +23,19 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             ]
         });
     }
-    
+
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-        // Attempt to retrieve analyticsKey from the message; fallback to component's field if unavailable
-        let analyticsKey = msg.analytics || this.getField('analyticsKey');
-    
+        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+
+            // Ignore if not from us
+        if (msg.fromUser != this.userID || !this.userID)
+            return
+
         if (msg.action == 'send-results') {
-            let result = msg.result;
-            console.log('ReceivedResult: ', result);
-            console.log('Sent to Analytics: ', analyticsKey, " : ", result);
+            console.log('Plugin: Message Received from panel!');
+            let result = await msg.result;
+            console.log('Plugin: Send Analytics Values: ', analyticsKey, ' : ', result);
             this.user.sendAnalytics(analyticsKey, result);
         }
     }
@@ -44,14 +47,16 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
  */
 class QuizComponent extends BaseComponent {
 
+
+
     /** Called when the component is clicked */
     async onClick() {
+        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+
         try {
             const questionsJson = this.getField('questions');
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
             const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
-
-
     
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
@@ -67,8 +72,7 @@ class QuizComponent extends BaseComponent {
     
         // Send the quiz data to the panel
             setTimeout(() => {
-                const analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
-                console.log('Analytics Key Sent:', analyticsKey);
+                console.log('Component Analytics Key Sent:', analyticsKey);
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
                     content: questions,  // Send already parsed object
@@ -76,15 +80,16 @@ class QuizComponent extends BaseComponent {
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     popupID: popupId
                 });
-            }, 500); // Delaying the message to ensure the iframe is fully loaded
+            }, 600); // Delaying the message to ensure the iframe is fully loaded
     
-            console.log('Popup ID:', popupId);
-            console.log('Question Sent:', questions);
+            console.log('Component Popup ID:', popupId);
+            console.log('Component Question Sent:', questions);
         } catch (error) {
             console.error('Error parsing questions:', error);
         }
     }
-
+        
+    
     
 }
 
