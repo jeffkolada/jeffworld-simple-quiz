@@ -8,6 +8,8 @@ To customize your quiz, use the format below. There is no limit on the number of
 
 When choosing the correct answer, start from value 0 for the first answer. In the example below, "Non-Fungible Token" is the correct answer, and the "correct" value is 0. If the second answer is correct, use value of 1.
 
+
+```json
 [
     {
         "question": "What does NFT stand for?",
@@ -35,6 +37,8 @@ When choosing the correct answer, start from value 0 for the first answer. In th
         "correct": 1
     }
 ]
+```
+
 
 
 # Vatom Template Plugin 🔌
