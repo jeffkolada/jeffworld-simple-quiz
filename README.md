@@ -44,6 +44,13 @@ When choosing the correct answer, start from value 0 for the first answer. In th
 To send a trigger to Vatom Studio custom event, provide an event value for your quiz. The studio configuration will define the "value" or number of correct answers required.
 
 
+
+
+
+
+
+
+
 # Vatom Template Plugin 🔌
 
 This plugin is designed to be used from within [Vatom Spaces](https://vatom.com).
