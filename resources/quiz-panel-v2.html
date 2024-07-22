@@ -83,7 +83,7 @@
         }
             showQuestion(); // Refresh the displayed question
         };
-        console.log('EventListener Analytics Key Received in Panel:', analyticsKey);
+//        console.log('EventListener Analytics Key Received in Panel:', analyticsKey);                                   // Console Log (4)
     });
 
 
@@ -108,15 +108,15 @@
       }
     }
 
-        // Function to send analytics
-        function sendAnalytics(src) {
-          // Send the results to the parent window
-          parent.postMessage({ 
-              action: 'send-results', 
-              result: correctAnswers,
-              analytics: analyticsKey}, '*');
-          console.log('Panel sent Game Over Analytics: ', analyticsKey, ' - ', correctAnswers)
-        }
+    // Function to send analytics
+    function sendAnalytics(src) {
+      // Send the results to the parent window
+      parent.postMessage({ 
+          action: 'send-results', 
+          result: correctAnswers,
+          analytics: analyticsKey}, '*');
+//      console.log('Panel sent Game Over Analytics: ', analyticsKey, ' - ', correctAnswers)                             // Console Log (6)
+    }
 
     // Function to check answers
     function checkAnswer(selected) {
@@ -135,7 +135,8 @@
         } else {
           const quizContainer = document.querySelector(".quiz-container");
           quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions.</p>`;
-          console.log('Panel: You got ', correctAnswers, ' out of ', questions.length, ' correct!' );
+          console.log('Quiz Finished: ', correctAnswers);                                                                                  // Console Log (5.1)
+//          console.log('Panel: You got ', correctAnswers, ' out of ', questions.length, ' correct!' );                  // Console Log (5.2)
           sendAnalytics();
         }
       }, 2000);
