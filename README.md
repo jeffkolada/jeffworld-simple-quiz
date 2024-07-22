@@ -2,7 +2,7 @@
 
 This is a simple multi-question quiz. When the quiz is finished, it can send an analytics value to Vatom Studio.
 
-# Quiz Content
+## Quiz Content
 
 To customize your quiz, use the format below. There is no limit on the number of questions.
 
@@ -39,6 +39,9 @@ When choosing the correct answer, start from value 0 for the first answer. In th
 ]
 ```
 
+## Analytics Value
+
+To send a trigger to Vatom Studio custom event, provide an event value for your quiz. The studio configuration will define the "value" or number of correct answers required.
 
 
 # Vatom Template Plugin 🔌
