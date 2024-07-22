@@ -1,13 +1,12 @@
 
 // JAVASCRIPT
 
-// 1. Plugin Send Message
+// Send from JS
 onTimer() {
     this.plugin.menus.postMessage({ action: 'are-you-alive'})
 }
 
-
-// 2. HTML Receive & Reply
+// Receive & Reply from HTML
 window.addEventListener('message', function (e) {
 
     // Open Check
@@ -18,30 +17,124 @@ window.addEventListener('message', function (e) {
 })
 
 
-// 3. Javascript Reaction (Base Plugin)
-
-async onMessage(data) {
-    let userID = await this.plugin.user.getID()
-
+// Reaction from JS
 if (data.action == 'still-breathing-sir') {
     this.editorResponseDate = Date.now()
 }
 
-}
 
 
-// Javascript Reaction (Component)
+
+>>>>>>   FROM PLANTING GARDEN   <<<<<<<<
+
+PLUGIN
+
 async onMessage(msg) {
 
-    if (msg.action === 'still-breathing-sir') {
-        npc.sendMessage({fromInstance: userID, action: 'still-breathing-sir'}, true)
-        return
+    // Update image now if panel loaded
+    if (msg.action === 'panel-closed') {
+        this.menus.returnFocus()
+        if (this.mounds?.length > 0) {
+            this.mounds.forEach(comp => {
+                comp.picking = false
+            })
+            return
+        }
     }
 
+    let userID = await this.user.getID()
+    let object = null
+
+    if (msg.action == 'panel-load') {
+        // Update the images
+        let message = this.getField('error_msg_component') || this.plugin.getField('error_msg') || null
+        this.plugin.menus.postMessage({ action: 'load-vatoms', vatoms: this.vatomObjects, message })
+    }
+}
+
+COMPONENT
+
+async onMessage(msg) {
+
+    // Ignore if not from us
+    if (msg.fromUser != this.plugin.userID || !this.plugin.userID)
+        return
+
+
+    if (msg.action == 'panel-load') {
+        // Update the images
+        let message = this.getField('error_msg_component') || this.plugin.getField('error_msg') || null
+        this.plugin.menus.postMessage({ action: 'load-vatoms', vatoms: this.vatomObjects, message })
+    }
 
 }
 
+HTML
+script
 
+function clickButton(src) {
+
+    parent.postMessage({ action: 'button-click', src: src}, '*')
+
+}
+
+ // Called when a message is received from the plugin
+ window.addEventListener('message', function (e) {
+
+    // Update the vatoms
+    if (e.data.action === 'load-vatoms') {
+        // load the vatoms
+        vatoms = e.data.vatoms
+        let loader = document.getElementById('loader')
+        let vatomDiv = document.getElementById('vatomDiv')
+        let grid = document.getElementById('grid')
+        let message = e.data.message
+        if (!grid) {
+            grid = document.createElement("div")
+            grid.id = "grid"
+            grid.style = "padding: 16px;"
+            grid.classList.add('container')
+            vatomDiv.appendChild(grid)
+        }
+        grid.innerHTML = ''
+
+        if (vatoms && vatoms.length > 0) {
+            vatoms.forEach(vatom => {
+            let item = document.createElement("div")
+            let bg = document.createElement("img")
+            let title = document.createElement("div")
+            item.className = "item"
+            item.style = "justify-content: center; align-items: center; flex-basis: fit-content; display: grid; padding: 10px; cursor: pointer; max-width: 200px"
+            item.id = vatom.id
+            item.onclick = () => {parent.postMessage({ action: 'picked', id: vatom.id }, '*')}
+            bg.style = "width: 100%; height: 180px;"
+            title.style = "width: 180px; color: white; font-size: 12px; font-family: sans-serif; text-align: center; padding: 6px"
+            bg.src = vatom.image
+            title.textContent = vatom.title
+            item.appendChild(title)
+            item.appendChild(bg)
+            grid.appendChild(item)
+            });
+        } else {
+            vatomDiv.innerText = message ? message : "No compatible vatoms found."
+        }
+
+
+        loader.style.display = 'none'
+
+    }
+
+})
+
+// On load, ask the plugin to send us all messages
+setTimeout(e => {
+    parent.postMessage({ action: 'panel-load' }, '*')
+}, 3000)
+
+window.addEventListener('pagehide', e => {
+    // On load, ask the plugin to send us all messages
+    parent.postMessage({ action: 'panel-closed' }, '*')
+});
 
 
 
@@ -150,87 +243,67 @@ async onMessage(msg) {
 
 
 
-//   GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN
-//   GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN
-//   GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN
-//   GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN                        -  GROUP GARDEN PLUGIN
 
-// GARDEN COMPONENT POPUP WINDOW SCRIPT
 
-            let vatoms = null
-            function clickButton(src) {
 
-                parent.postMessage({ action: 'button-click', src: src}, '*')
 
-            }
 
-            // Called when a message is received from the plugin
-            window.addEventListener('message', function (e) {
 
-                // Update the vatoms
-                if (e.data.action === 'load-vatoms') {
 
-                    // load the vatoms
-                    vatoms = e.data.vatoms
-                    let message = e.data.message
-                    
+// Import necessary modules
+import { BasePlugin, BaseComponent } from 'vatom-spaces-plugins'
+
+
+export default class MultipleChoiceQuizPlugin extends BasePlugin {
+
+    /** Plugin info */
+    static id = "multiple-choice-quiz";
+    static name = "Multiple Choice Quiz Plugin";
+    static description = "Creates a multiple-choice quiz when the component is clicked.";
+
+    /** Called on load */
+    onLoad() {
+        // Register component as an attachable component
+        this.objects.registerComponent(QuizComponent, {
+            id: 'quiz-component',
+            name: 'Quiz Component',
+            description: 'Creates a multiple-choice quiz when the component is clicked.',
+            settings: obj => [
+                { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' }
+            ]
+        });
+    }
+}
+
+/**
+ * Component that creates a multiple-choice quiz.
+ */
+class QuizComponent extends BaseComponent {
+
+    /** Called when the component is clicked */
+    async onClick() {
+        try {
+            // Get quiz settings
+            const questionsJson = this.getField('questions');
+
+            // Parse JSON string to array of questions
+            const questions = JSON.parse(questionsJson);
+
+            // Open popup with quiz questions and choices
+            const popupId = await this.plugin.menus.displayPopup({
+                title: 'Multiple Choice Quiz',
+                panel: {
+                    iframeURL: this.paths.absolute('./quiz-panel-v2.html'),
+                    width: 600,
+                    height: 500,
+                    onClose: () => {
+                        console.log("Popup closed");
+                    },
                 }
-            })
-
-
-            // On load, ask the plugin to send us all messages
-            setTimeout(e => {
-                parent.postMessage({ action: 'panel-load' }, '*')
-            }, 3000)
-
-
-            window.addEventListener('pagehide', e => {
-                // On load, ask the plugin to send us all messages
-                parent.postMessage({ action: 'panel-closed' }, '*')
             });
-
-
-
-// GARDEN PLUGIN JAVASCRIPT
-
-export default class GroupGarden extends BasePlugin {
-    async onMessage(msg) {
-
-        // Update image now if panel loaded
-        if (msg.action === 'panel-closed') {
-            this.menus.returnFocus()
-        }
-
-        let userID = await this.user.getID()
-        let object = null
-
-        if (!object) return
-
-        // Update image now if panel loaded
-        if (msg.action === 'panel-load') {
-            object.sendMessage({fromUser: userID, action: 'panel-load'}, true)
-            return
-        }
-    }
-}
-
-class GardenComponent extends BaseComponent {
-
-    async onMessage(msg) {
-
-        // Ignore if not from us
-        if (msg.fromUser != this.plugin.userID || !this.plugin.userID)
-            return
-
-        if (msg.action == 'panel-load') {
-            // Update the images
-            let message = this.getField('error_msg_component') || this.plugin.getField('error_msg') || null
-            this.plugin.menus.postMessage({ action: 'load-vatoms', vatoms: this.vatomObjects, message })
-        }
+            console.log('Popup ID:', popupId);
+            console.log('Question Sent:', questions);
 
     }
-
 }
-
-
 
