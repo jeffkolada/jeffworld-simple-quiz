@@ -70,7 +70,7 @@
     </div>
   </div>
   <script>
-  let analyticsKey = 'abcd';
+  let analyticsKey = 'null';
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -113,8 +113,9 @@
           // Send the results to the parent window
           parent.postMessage({ 
               action: 'send-results', 
-              result: correctAnswers }, '*');
-          console.log('Panel sendAnalytics logged Results: ', correctAnswers)
+              result: correctAnswers,
+              analytics: analyticsKey}, '*');
+          console.log('Panel sent Game Over Analytics: ', analyticsKey, ' - ', correctAnswers)
         }
 
     // Function to check answers

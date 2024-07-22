@@ -27,13 +27,10 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
         let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
-
-            // Ignore if not from us
-        if (msg.fromUser != this.userID || !this.userID)
-            return
-
+        console.log('Plugin onMessage Analytics Key: ', analyticsKey);
         if (msg.action == 'send-results') {
             console.log('Plugin: Message Received from panel!');
+            let analyticsKey = await msg.analytics;
             let result = await msg.result;
             console.log('Plugin: Send Analytics Values: ', analyticsKey, ' : ', result);
             this.user.sendAnalytics(analyticsKey, result);
