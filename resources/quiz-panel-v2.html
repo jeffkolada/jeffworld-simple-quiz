@@ -5,20 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+      @font-face {
+          font-family: 'Outfit';
+          src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+      }
+
       body {
+          font-family: 'Outfit', sans-serif;
           background-color: #000000;
           color: aliceblue;
           margin: 0;
           padding: 25px; /* Add padding to the body */
           box-sizing: border-box; /* Include padding in the body's total width and height */
           height: 100vh; /* Full viewport height */
+          display: flex;
+          justify-content: center;
+          text-align: center; /* Center align all content */
       }
-    
+
       .quiz-container {
           box-sizing: border-box;
           width: calc(100% - 50px); /* Adjust width to account for body padding */
           max-width: 600px;
-          margin: 0 auto;
           padding: 2em;
           background-color: #191919;
           border-radius: 20px;
@@ -26,57 +34,96 @@
           height: calc(100% - 50px); /* Adjust height to account for body padding */
           display: flex;
           flex-direction: column; /* Stack children vertically */
+          justify-content: center; /* Center align all content */
+          align-items: center;
       }
-  
+
       .choices {
           display: flex;
+          flex-direction: column;
+          width: 100%; /* Fill the width of the container */
+          padding: 10px;
       }
-    
+
       .choice {
+          font-family: 'Outfit', sans-serif;
+          font-weight: 300;
           font-size: 1em;
-          display: block;
-          margin: 5px 5px;
+          margin: 5px 0; /* Margin between buttons */
           padding: .5em .75em;
           background-color: #393939;
           color: white;
           border: none;
           border-radius: 5px;
           cursor: pointer;
+          width: 400px; /* Set width of the buttons */
+          max-width: 550px; /* Set maximum width */
+          height: 60px; /* Set a fixed height */
+          box-sizing: border-box;
       }
-    
+
       .choice:hover {
           background-color: #4a5056;
       }
-      .feedback {
-        text-align: center;
+
+      .feedback-container {
+          position: relative;
+          width: 400px; /* Fill the width of the container */
+          height: 30px; /* Set a fixed height for the spacer */
+          margin-top: 10px; /* Add some spacing above the feedback */
+          background-color: rgba(255, 255, 255, 0); /* 0% opacity */
       }
+
+      .feedback-background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 400px;
+          height: 30px;
+          background-color: rgba(255, 255, 255, 0);
+      }
+
+      .feedback-content {
+          position: relative;
+          z-index: 1; /* Ensure it appears above the background */
+          margin: 0; /* Remove default margin */
+          line-height: 30px; /* Center text vertically */
+          width: 100%; /* Fill the width of the container */
+      }
+
+
       .quiz-title {
-        text-align: center;
+          text-align: center;
       }
+
       .timer-bar-container {
-      position: relative;
-      height: 5px; /* Total height of both bars */
-    }
+          position: relative;
+          height: 5px; /* Total height of both bars */
+          width: 100%; /* Fill the width of the container */
+          margin-bottom: 20px; /* Add some space below the timer bar */
+      }
 
-    .timer-bar-background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 5px;
-      width: 100%;
-      background-color: rgb(170, 170, 170);
-      opacity: 0.5; /* 50% opacity */
-    }
+      .timer-bar-background {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 5px;
+          width: 100%;
+          background-color: rgba(255, 255, 255, 0.10);
+          opacity: 100;
+          border-radius: 2px;
+      }
 
-    .timer-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 5px;
-      background-color: rgb(170, 170, 170);
-      width: 0%; /* Initially zero width */
-      transition: width linear;
-    }
+      .timer-bar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 5px;
+          background-color: rgb(170, 170, 170);
+          width: 0%; /* Initially zero width */
+          border-radius: 2px;
+          transition: width linear;
+      }
   </style>
   
 </head>
@@ -93,9 +140,10 @@
         <button class="choice" onclick="checkAnswer(0)"></button>
         <button class="choice" onclick="checkAnswer(1)"></button>
         <button class="choice" onclick="checkAnswer(2)"></button>
-      </div>
-      <p id="feedback"></p>
-    </div>
+        <div class="feedback-container">
+          <div class="feedback-background"></div>
+          <p id="feedback" class="feedback-content"></p>
+        </div>
   </div>
   <script>
     let analyticsKey = 'null';
@@ -183,7 +231,7 @@
         showQuestion();
       } else {
         const quizContainer = document.querySelector(".quiz-container");
-        quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions.</p>`;
+        quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions correct.</p>`;
         console.log('Quiz Finished: ', correctAnswers);
         sendAnalytics();
       }
