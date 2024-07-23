@@ -49,6 +49,11 @@ class QuizComponent extends BaseComponent {
 
     /** Called when the component is clicked */
     async onClick() {
+        if (this.isPopupOpen) {
+            console.log('Popup is already open'); // Prevent opening another popup
+            return;
+        }
+
         let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
         try {
             const questionsJson = this.getField('questions');
@@ -58,6 +63,8 @@ class QuizComponent extends BaseComponent {
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             console.log('Panel Opened');                                                                  // Console Log ()
             
+            this.isPopupOpen = true; // Set the flag to true
+
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
                 panel: {
@@ -66,6 +73,7 @@ class QuizComponent extends BaseComponent {
                     height: 600,
                     onClose: () => {
                         console.log("Popup closed");
+                        this.isPopupOpen = false; // Reset the flag when the popup is closed
                     },
                 }
             });
@@ -88,6 +96,7 @@ class QuizComponent extends BaseComponent {
 //            console.log('Component Question Sent:', questions);                                     // Console Log (2)
         } catch (error) {
             console.error('Error parsing questions:', error);
+            this.isPopupOpen = false; // Reset the flag in case of an error
         }
     }
         
