@@ -149,18 +149,27 @@
     let analyticsKey = 'null';
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
+    let endMessageWin = 'Congratulations! You answered all questions correctly!';
+    let endMessageLose = 'Keep practicing to improve your score.';
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
         questions = event.data.content; // Directly use the passed object
         analyticsKey = event.data.analytics; // Update the analytics key
-        timerOn = event.data.timerOn; // Update the timer status
+        timerOn = event.data.timerOn || false; // Update the timer status
+        endMessageWin = event.data.endMessageWin; // Update the end message
+        endMessageLose = event.data.endMessageLose; // Update the end message
         timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
-        console.log(timerOn);
+
+        // Debugging logs
+        console.log('timerOn:', timerOn);
+        console.log('messageCorrect:', endMessageWin);
+        console.log('messageIncorrect:', endMessageLose);
+
         const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
-          quizTitleElement.textContent = event.data.quizTitle;
+          quizTitleElement.textContent = event.data.quizTitle || 'Multiple Choice Quiz';
         }
         showQuestion(); // Refresh the displayed question
       }
@@ -231,7 +240,15 @@
         showQuestion();
       } else {
         const quizContainer = document.querySelector(".quiz-container");
-        quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions correct.</p>`;
+        const allCorrect = correctAnswers === questions.length;
+        const resultMessage = `You got ${correctAnswers} out of ${questions.length} questions correct.`;
+        const additionalMessage = allCorrect ? endMessageWin : endMessageLose;
+
+    // Debugging logs
+    console.log('resultMessage:', resultMessage);
+    console.log('additionalMessage:', additionalMessage);
+
+    quizContainer.innerHTML = `<p>${resultMessage}</p><p>${additionalMessage}</p>`;
         console.log('Quiz Finished: ', correctAnswers);
         sendAnalytics();
       }
