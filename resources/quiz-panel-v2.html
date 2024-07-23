@@ -73,9 +73,9 @@
       top: 0;
       left: 0;
       height: 5px;
-      background-color: red;
+      background-color: rgb(170, 170, 170);
       width: 0%; /* Initially zero width */
-      transition: width 0.1s linear; /* Smooth transition */
+      transition: width 0.1s linear;
     }
   </style>
   
@@ -155,11 +155,8 @@
 
       clearInterval(timerInterval); // Clear any existing interval
 
-      const interval = 100; // Update interval in milliseconds
-      const increment = (100 / (timerDuration * 1000)) * interval; // Increment based on timer duration and interval
-
       timerInterval = setInterval(() => {
-        width += increment / timerDuration; // Increase the width incrementally
+        width += 100 / timerDuration; // Increase the width based on the timer duration
         timerBar.style.width = width + '%';
 
         if (width >= 100) {
