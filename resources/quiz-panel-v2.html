@@ -53,11 +53,39 @@
       .quiz-title {
         text-align: center;
       }
+      .timer-bar-container {
+      position: relative;
+      height: 5px; /* Total height of both bars */
+    }
+
+    .timer-bar-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 5px;
+      width: 100%;
+      background-color: rgb(170, 170, 170);
+      opacity: 0.5; /* 50% opacity */
+    }
+
+    .timer-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 5px;
+      background-color: rgb(170, 170, 170);
+      width: 0%; /* Initially zero width */
+      transition: width linear;
+    }
   </style>
   
 </head>
 <body>
   <div class="quiz-container">
+    <div class="timer-bar-container" id="timer-bar-container" style="display: none;">
+      <div class="timer-bar-background"></div>
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
     <h1 id="quiz-title"></h1>
     <div class="question">
       <p id="question-text"></p>
@@ -70,27 +98,31 @@
     </div>
   </div>
   <script>
-  let analyticsKey = 'null';
+    let analyticsKey = 'null';
+    let timerOn = false; // Initialize timerOn to false
+    let timerDuration = 10; // Default timer duration if not provided
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
-        if (event.data.action === 'update-quiz') {
-            questions = event.data.content; // Directly use the passed object
-            analyticsKey = event.data.analytics; // Update the analytics key
-        const quizTitleElement = document.getElementById('quiz-title');   // Update the quiz title
+      if (event.data.action === 'update-quiz') {
+        questions = event.data.content; // Directly use the passed object
+        analyticsKey = event.data.analytics; // Update the analytics key
+        timerOn = event.data.timerOn; // Update the timer status
+        timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
+        console.log(timerOn);
+        const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
-            quizTitleElement.textContent = event.data.quizTitle;
+          quizTitleElement.textContent = event.data.quizTitle;
         }
-            showQuestion(); // Refresh the displayed question
-        };
-//        console.log('EventListener Analytics Key Received in Panel:', analyticsKey);                                   // Console Log (4)
+        showQuestion(); // Refresh the displayed question
+      }
     });
-
 
     // Variables to track the state of the quiz
     let currentQuestion = 0;
     let correctAnswers = 0;
     let questions = []; // Initialize as empty or with default questions
+    let timerInterval;
 
     // Function to show a question
     function showQuestion() {
@@ -105,21 +137,70 @@
 
         const feedback = document.getElementById("feedback");
         feedback.textContent = "";
+
+        if (timerOn) {
+          document.getElementById("timer-bar-container").style.display = "block";
+          startTimer();
+        } else {
+          document.getElementById("timer-bar-container").style.display = "none";
+        }
+      }
+    }
+
+      // Function to start the countdown timer
+    function startTimer() {
+      const timerBar = document.getElementById("timer-bar");
+      timerBar.style.transition = 'none'; // Disable transition to reset width
+      timerBar.style.width = '0%'; // Reset width to 0%
+      
+      // Force a reflow to apply the initial width immediately
+      timerBar.offsetWidth; 
+
+      timerBar.style.transition = `width ${timerDuration}s linear`; // Set the transition duration
+      timerBar.style.width = '100%'; // Set the width to 100% to trigger the transition
+
+      clearTimeout(timerInterval); // Clear any existing timeout
+
+      timerInterval = setTimeout(() => {
+        moveToNextQuestion(); // Move to the next question if the timer runs out
+      }, timerDuration * 1000); // Wait for the duration of the timer
+    }
+
+    // Function to stop the countdown timer
+    function stopTimer() {
+      clearTimeout(timerInterval); // Clear the timer
+      const timerBar = document.getElementById("timer-bar");
+      const computedStyle = getComputedStyle(timerBar);
+      const width = computedStyle.width;
+      timerBar.style.transition = 'none'; // Remove the transition
+      timerBar.style.width = width; // Set the current width to stop the bar
+    }
+
+    // Function to move to the next question
+    function moveToNextQuestion() {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        const quizContainer = document.querySelector(".quiz-container");
+        quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions.</p>`;
+        console.log('Quiz Finished: ', correctAnswers);
+        sendAnalytics();
       }
     }
 
     // Function to send analytics
-    function sendAnalytics(src) {
-      // Send the results to the parent window
+    function sendAnalytics() {
       parent.postMessage({ 
           action: 'send-results', 
           result: correctAnswers,
           analytics: analyticsKey}, '*');
-//      console.log('Panel sent Game Over Analytics: ', analyticsKey, ' - ', correctAnswers)                             // Console Log (6)
     }
 
     // Function to check answers
     function checkAnswer(selected) {
+      stopTimer(); // Stop the timer when an answer is checked
+
       const feedback = document.getElementById("feedback");
       if (selected === questions[currentQuestion].correct) {
         feedback.textContent = "Correct!";
@@ -129,25 +210,9 @@
       }
 
       setTimeout(() => {
-        currentQuestion++;
-        if (currentQuestion < questions.length) {
-          showQuestion();
-        } else {
-          const quizContainer = document.querySelector(".quiz-container");
-          quizContainer.innerHTML = `<p>You got ${correctAnswers} out of ${questions.length} questions.</p>`;
-          console.log('Quiz Finished: ', correctAnswers);                                                                                  // Console Log (5.1)
-//          console.log('Panel: You got ', correctAnswers, ' out of ', questions.length, ' correct!' );                  // Console Log (5.2)
-          sendAnalytics();
-        }
+        moveToNextQuestion();
       }, 2000);
     }
-
-
-    
-
-
-    
-
   </script>
 </body>
 
