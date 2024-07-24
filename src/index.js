@@ -77,7 +77,7 @@ class QuizComponent extends BaseComponent {
                 panel: {
                     iframeURL: this.paths.absolute('./quiz-panel-v2.html'),
                     width: 600,
-                    height: 600,
+                    height: 650,
                     onClose: () => {
                         console.log("Popup closed");
                         this.isPopupOpen = false; // Reset the flag when the popup is closed

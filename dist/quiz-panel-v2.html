@@ -60,10 +60,15 @@
           max-width: 550px; /* Set maximum width */
           height: 60px; /* Set a fixed height */
           box-sizing: border-box;
+          transition: background-color 0.3s ease; /* Smooth transition for background color */
       }
 
       .choice:hover {
           background-color: #4a5056;
+      }
+
+      .correct-answer {
+        background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
       }
 
       .feedback-container {
@@ -136,14 +141,14 @@
     <h1 id="quiz-title"></h1>
     <div class="question">
       <p id="question-text"></p>
-      <div class="choices">
-        <button class="choice" onclick="checkAnswer(0)"></button>
-        <button class="choice" onclick="checkAnswer(1)"></button>
-        <button class="choice" onclick="checkAnswer(2)"></button>
-        <div class="feedback-container">
-          <div class="feedback-background"></div>
-          <p id="feedback" class="feedback-content"></p>
-        </div>
+      <div class="choices" id="choices-container">
+        <!-- Choice buttons will be dynamically created here -->
+      </div>
+      <div class="feedback-container">
+        <div class="feedback-background"></div>
+        <p id="feedback" class="feedback-content"></p>
+      </div>
+    </div>
   </div>
   <script>
     let analyticsKey = 'null';
@@ -158,9 +163,9 @@
         questions = event.data.content; // Directly use the passed object
         analyticsKey = event.data.analytics; // Update the analytics key
         timerOn = event.data.timerOn || false; // Update the timer status
+        timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
         endMessageWin = event.data.endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose; // Update the end message
-        timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
 
 // Debugging logs
 //        console.log('timerOn:', timerOn);
@@ -187,9 +192,15 @@
         const questionText = document.getElementById("question-text");
         questionText.textContent = questions[currentQuestion].question;
 
-        const choices = document.querySelectorAll(".choice");
-        choices.forEach((choice, index) => {
-          choice.textContent = questions[currentQuestion].choices[index];
+        const choicesContainer = document.getElementById("choices-container");
+        choicesContainer.innerHTML = ''; // Clear existing choices
+
+        questions[currentQuestion].choices.forEach((choice, index) => {
+          const button = document.createElement('button');
+          button.className = 'choice';
+          button.textContent = choice;
+          button.onclick = () => checkAnswer(index);
+          choicesContainer.appendChild(button);
         });
 
         const feedback = document.getElementById("feedback");
@@ -203,6 +214,7 @@
         }
       }
     }
+
 
       // Function to start the countdown timer
     function startTimer() {
@@ -267,6 +279,11 @@
       stopTimer(); // Stop the timer when an answer is checked
 
       const feedback = document.getElementById("feedback");
+      const choices = document.querySelectorAll(".choice");
+
+      // Highlight the correct answer
+      choices[questions[currentQuestion].correct].classList.add('correct-answer');
+
       if (selected === questions[currentQuestion].correct) {
         feedback.textContent = "Correct!";
         correctAnswers++;
@@ -275,8 +292,9 @@
       }
 
       setTimeout(() => {
+        choices[questions[currentQuestion].correct].classList.remove('correct-answer');
         moveToNextQuestion();
-      }, 2000);
+      }, 3000);
     }
   </script>
 </body>
