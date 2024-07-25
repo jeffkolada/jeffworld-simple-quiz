@@ -68,8 +68,13 @@
       }
 
       .correct-answer {
-        background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
+          background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
       }
+
+      .incorrect-answer {
+        background-color: rgba(210, 47, 47, 0.567); /* Highlight incorrect answer with red color */
+      }
+
 
       .feedback-container {
           position: relative;
@@ -154,48 +159,51 @@
     let analyticsKey = 'null';
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
-    let endMessageWin = 'Congratulations! You answered all questions correctly!';
-    let endMessageLose = 'Keep practicing to improve your score.';
+    let endMessageWin = 'Congratulations! You answered correctly!';
+    let endMessageLose = 'Try again next time.';
+    let randomQuestion = false; // Initialize random question flag
+    let questions = []; // Initialize as empty array
+    let selectedQuestion = null; // Initialize the selected question
+    let timerInterval;
+    let quizResult = 0; // Initialize the quiz result
+    let currentQuestion = 0; // Initialize the current question index
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
-        questions = event.data.content; // Directly use the passed object
-        analyticsKey = event.data.analytics; // Update the analytics key
-        timerOn = event.data.timerOn || false; // Update the timer status
-        timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
-        endMessageWin = event.data.endMessageWin; // Update the end message
-        endMessageLose = event.data.endMessageLose; // Update the end message
+        questions = event.data.content || []; // Use provided questions
+        analyticsKey = event.data.analytics || analyticsKey; // Update the analytics key
+        timerOn = event.data.timerOn || timerOn; // Update the timer status
+        timerDuration = event.data.timerDuration || timerDuration; // Update the timer duration
+        endMessageWin = event.data.endMessageWin || endMessageWin; // Update the end message
+        endMessageLose = event.data.endMessageLose || endMessageLose; // Update the end message
+        randomQuestion = event.data.randomQuestion || randomQuestion; // Update the random question flag
 
-// Debugging logs
-//        console.log('timerOn:', timerOn);
-//        console.log('messageCorrect:', endMessageWin);
-//        console.log('messageIncorrect:', endMessageLose);
+        // Select a random question if the flag is true
+        if (randomQuestion && questions.length > 0) {
+          selectedQuestion = questions[Math.floor(Math.random() * questions.length)];
+        } else {
+          selectedQuestion = questions[0]; // Use the first question if not random
+        }
 
-        const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
+        const quizTitleElement = document.getElementById('quiz-title');
         if (quizTitleElement) {
-          quizTitleElement.textContent = event.data.quizTitle || 'Multiple Choice Quiz';
+          quizTitleElement.textContent = event.data.quizTitle || 'Single Question Quiz';
         }
         showQuestion(); // Refresh the displayed question
       }
     });
 
-    // Variables to track the state of the quiz
-    let currentQuestion = 0;
-    let correctAnswers = 0;
-    let questions = []; // Initialize as empty or with default questions
-    let timerInterval;
 
-    // Function to show a question
     function showQuestion() {
-      if (questions.length > 0 && currentQuestion < questions.length) {
+      if (selectedQuestion) {
         const questionText = document.getElementById("question-text");
-        questionText.textContent = questions[currentQuestion].question;
+        questionText.textContent = selectedQuestion.question;
 
         const choicesContainer = document.getElementById("choices-container");
         choicesContainer.innerHTML = ''; // Clear existing choices
 
-        questions[currentQuestion].choices.forEach((choice, index) => {
+        selectedQuestion.choices.forEach((choice, index) => {
           const button = document.createElement('button');
           button.className = 'choice';
           button.textContent = choice;
@@ -218,87 +226,82 @@
       }
     }
 
-
-      // Function to start the countdown timer
-    function startTimer() {
+     // Function to start the countdown timer
+     function startTimer() {
       const timerBar = document.getElementById("timer-bar");
-      timerBar.style.transition = 'none'; // Disable transition to reset width
-      timerBar.style.width = '0%'; // Reset width to 0%
+      timerBar.style.transition = 'none';                                               // Disable transition to reset width
+      timerBar.style.width = '0%';                                                      // Reset width to 0%
       
       // Force a reflow to apply the initial width immediately
       timerBar.offsetWidth; 
 
-      timerBar.style.transition = `width ${timerDuration}s linear`; // Set the transition duration
-      timerBar.style.width = '100%'; // Set the width to 100% to trigger the transition
+      timerBar.style.transition = `width ${timerDuration}s linear`;                     // Set the transition duration
+      timerBar.style.width = '100%';                                                    // Set the width to 100% to trigger the transition
 
-      clearTimeout(timerInterval); // Clear any existing timeout
+      clearTimeout(timerInterval);                                                      // Clear any existing timeout
 
       timerInterval = setTimeout(() => {
-        moveToNextQuestion(); // Move to the next question if the timer runs out
-      }, timerDuration * 1000); // Wait for the duration of the timer
+        moveToNextQuestion();                                                           // Move to the next question if the timer runs out
+      }, timerDuration * 1000);                                                         // Wait for the duration of the timer
     }
 
     // Function to stop the countdown timer
     function stopTimer() {
-      clearTimeout(timerInterval); // Clear the timer
+      clearTimeout(timerInterval);                                                      // Clear the timer
       const timerBar = document.getElementById("timer-bar");
       const computedStyle = getComputedStyle(timerBar);
       const width = computedStyle.width;
-      timerBar.style.transition = 'none'; // Remove the transition
-      timerBar.style.width = width; // Set the current width to stop the bar
-    }
-
-    // Function to move to the next question
-    function moveToNextQuestion() {
-      currentQuestion++;
-      if (currentQuestion < questions.length) {
-        showQuestion();
-      } else {
-        const quizContainer = document.querySelector(".quiz-container");
-        const allCorrect = correctAnswers === questions.length;
-        const resultMessage = `You got ${correctAnswers} out of ${questions.length} questions correct.`;
-        const additionalMessage = allCorrect ? endMessageWin : endMessageLose;
-
-// Debugging logs
-//    console.log('resultMessage:', resultMessage);
-//    console.log('additionalMessage:', additionalMessage);
-
-    quizContainer.innerHTML = `<p>${resultMessage}</p><p>${additionalMessage}</p>`;
-        console.log('Quiz Finished: ', correctAnswers);
-        sendAnalytics();
-      }
+      timerBar.style.transition = 'none';                                               // Remove the transition
+      timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
     // Function to send analytics
-    function sendAnalytics() {
+    function sendAnalytics(quizResult) {
       parent.postMessage({ 
           action: 'send-results', 
-          result: correctAnswers,
+          result: quizResult,
           analytics: analyticsKey}, '*');
     }
 
-    // Function to check answers
     function checkAnswer(selected) {
       stopTimer(); // Stop the timer when an answer is checked
 
-      const feedback = document.getElementById("feedback");
       const choices = document.querySelectorAll(".choice");
 
-      // Highlight the correct answer
-      choices[questions[currentQuestion].correct].classList.add('correct-answer');
+      // Disable hover effect on all choices
+      choices.forEach(choice => choice.style.pointerEvents = 'none');
 
-      if (selected === questions[currentQuestion].correct) {
-        feedback.textContent = "Correct!";
-        correctAnswers++;
+      // Highlight the correct answer
+      choices[selectedQuestion.correct].classList.add('correct-answer');
+
+      let quizResult;
+      if (selected === selectedQuestion.correct) {
+        quizResult = 1; // Correct answer
       } else {
-        feedback.textContent = "Incorrect!";
+        choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
+        quizResult = 0; // Incorrect answer
       }
 
-      setTimeout(() => {
-        choices[questions[currentQuestion].correct].classList.remove('correct-answer');
-        moveToNextQuestion();
-      }, 3000);
+      // Send the analytics event
+      sendAnalytics(quizResult);
+
+      // Check if this is the last question
+      const isLastQuestion = currentQuestion >= questions.length - 1;
+
+      showFeedback(selected === selectedQuestion.correct, isLastQuestion);
     }
+
+    // Function to display feedback
+    function showFeedback(isCorrect) {
+      const feedback = document.getElementById("feedback");
+      feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
+    }
+
+    // Initialize the quiz with a placeholder message
+    document.getElementById('quiz-title').textContent = ' ';
+    document.getElementById("question-text").textContent = "  ";
   </script>
 </body>
+
+
 </html>
