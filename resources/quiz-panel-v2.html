@@ -60,21 +60,25 @@
           max-width: 550px; /* Set maximum width */
           height: 60px; /* Set a fixed height */
           box-sizing: border-box;
-          transition: background-color 0.3s ease; /* Smooth transition for background color */
+          transition: background-color 0.2s ease; /* Smooth transition for background color */
       }
 
       .choice:hover {
           background-color: #4a5056;
       }
 
+      .choice.disable-hover:hover {
+          background-color: #393939; /* Disable hover effect */
+      }
+
       .correct-answer {
-        background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
+          background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
       }
 
       .feedback-container {
           position: relative;
           width: 400px; /* Fill the width of the container */
-          height: 30px; /* Set a fixed height for the spacer */
+          height: 20px; /* Set a fixed height for the spacer */
           margin-top: 10px; /* Add some spacing above the feedback */
           background-color: rgba(255, 255, 255, 0); /* 0% opacity */
       }
@@ -84,7 +88,7 @@
           top: 0;
           left: 0;
           width: 400px;
-          height: 30px;
+          height: 20px;
           background-color: rgba(255, 255, 255, 0);
       }
 
@@ -92,7 +96,7 @@
           position: relative;
           z-index: 1; /* Ensure it appears above the background */
           margin: 0; /* Remove default margin */
-          line-height: 30px; /* Center text vertically */
+          line-height: 20px; /* Center text vertically */
           width: 100%; /* Fill the width of the container */
       }
 
@@ -212,6 +216,9 @@
         } else {
           document.getElementById("timer-bar-container").style.display = "none";
         }
+      } else {
+        const questionText = document.getElementById("question-text");
+        questionText.textContent = "No questions available. Please reload the quiz...";
       }
     }
 
@@ -219,30 +226,30 @@
       // Function to start the countdown timer
     function startTimer() {
       const timerBar = document.getElementById("timer-bar");
-      timerBar.style.transition = 'none'; // Disable transition to reset width
-      timerBar.style.width = '0%'; // Reset width to 0%
+      timerBar.style.transition = 'none';                                               // Disable transition to reset width
+      timerBar.style.width = '0%';                                                      // Reset width to 0%
       
       // Force a reflow to apply the initial width immediately
       timerBar.offsetWidth; 
 
-      timerBar.style.transition = `width ${timerDuration}s linear`; // Set the transition duration
-      timerBar.style.width = '100%'; // Set the width to 100% to trigger the transition
+      timerBar.style.transition = `width ${timerDuration}s linear`;                     // Set the transition duration
+      timerBar.style.width = '100%';                                                    // Set the width to 100% to trigger the transition
 
-      clearTimeout(timerInterval); // Clear any existing timeout
+      clearTimeout(timerInterval);                                                      // Clear any existing timeout
 
       timerInterval = setTimeout(() => {
-        moveToNextQuestion(); // Move to the next question if the timer runs out
-      }, timerDuration * 1000); // Wait for the duration of the timer
+        moveToNextQuestion();                                                           // Move to the next question if the timer runs out
+      }, timerDuration * 1000);                                                         // Wait for the duration of the timer
     }
 
     // Function to stop the countdown timer
     function stopTimer() {
-      clearTimeout(timerInterval); // Clear the timer
+      clearTimeout(timerInterval);                                                      // Clear the timer
       const timerBar = document.getElementById("timer-bar");
       const computedStyle = getComputedStyle(timerBar);
       const width = computedStyle.width;
-      timerBar.style.transition = 'none'; // Remove the transition
-      timerBar.style.width = width; // Set the current width to stop the bar
+      timerBar.style.transition = 'none';                                               // Remove the transition
+      timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
     // Function to move to the next question
@@ -276,26 +283,35 @@
 
     // Function to check answers
     function checkAnswer(selected) {
-      stopTimer(); // Stop the timer when an answer is checked
+  stopTimer(); // Stop the timer when an answer is checked
 
-      const feedback = document.getElementById("feedback");
-      const choices = document.querySelectorAll(".choice");
+  const choices = document.querySelectorAll(".choice");
 
-      // Highlight the correct answer
-      choices[questions[currentQuestion].correct].classList.add('correct-answer');
+  // Disable hover effect on all choices by removing the hover style
+  choices.forEach(choice => choice.style.pointerEvents = 'none');
 
-      if (selected === questions[currentQuestion].correct) {
-        feedback.textContent = "Correct!";
-        correctAnswers++;
-      } else {
-        feedback.textContent = "Incorrect!";
-      }
+  // Highlight the correct answer immediately
+  choices[questions[currentQuestion].correct].classList.add('correct-answer');
 
-      setTimeout(() => {
-        choices[questions[currentQuestion].correct].classList.remove('correct-answer');
-        moveToNextQuestion();
-      }, 3000);
-    }
+  // Add feedback after highlighting
+  const feedback = document.getElementById("feedback");
+  if (selected === questions[currentQuestion].correct) {
+    feedback.textContent = "Correct!";
+    correctAnswers++;
+  } else {
+    feedback.textContent = "Incorrect!";
+  }
+
+  setTimeout(() => {
+    // Remove the highlight and re-enable the hover effect after 2 seconds and move to the next question
+    choices.forEach(choice => {
+      choice.classList.remove('correct-answer');
+      choice.style.pointerEvents = '';
+    });
+    moveToNextQuestion();
+  }, 3000);
+}
+
   </script>
 </body>
 

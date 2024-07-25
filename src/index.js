@@ -19,11 +19,11 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },  
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' },
-                { id: 'section-end-message', name: 'Timer Settings', type: 'section' },
+                { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
-                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', help: 'Send an Analytics Event with the custom Name and a Value equal to the number of correct answers.' },
-                { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event.' },
+                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+                { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
                 { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
