@@ -1,7 +1,7 @@
 {
   "id": "jeffworldquiz",
   "name": "Simple Quiz",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "beta": true,
   "pluginType": "Business",
   "description": "A simple quiz component",
@@ -10,6 +10,6 @@
   "category": "Games",
   "businessId": "hCsur3Hk00",
   "price": 0,
-  "releaseNotes": "N/A",
-  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/bddc7465a94f7261bda81c723744ecbf/plugin.js"
+  "releaseNotes": "Added highlight for correct and incorrect answers. Answer buttons are now dynamic and can handle 2, 3 or 4 answer choices per question.",
+  "entrypoint": ""
 }
