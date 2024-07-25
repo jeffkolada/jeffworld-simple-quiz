@@ -287,41 +287,43 @@
 
     // Function to check answers
     function checkAnswer(selected) {
-  stopTimer(); // Stop the timer when an answer is checked
+      stopTimer(); // Stop the timer when an answer is checked
 
-  const choices = document.querySelectorAll(".choice");
+      const choices = document.querySelectorAll(".choice");
 
-  // Disable hover effect on all choices by removing the hover style
-  choices.forEach(choice => choice.style.pointerEvents = 'none');
+      // Disable hover effect on all choices by removing the hover style
+      choices.forEach(choice => choice.style.pointerEvents = 'none');
 
-  // Highlight the correct answer immediately
-  choices[questions[currentQuestion].correct].classList.add('correct-answer');
+      // Highlight the correct answer immediately
+      choices[questions[currentQuestion].correct].classList.add('correct-answer');
 
-  // Highlight the chosen incorrect answer, if incorrect
-  if (selected !== questions[currentQuestion].correct) {
-  choices[selected].classList.add('incorrect-answer');
-  }
+      // Highlight the chosen incorrect answer, if incorrect
+      if (selected !== questions[currentQuestion].correct) {
+      choices[selected].classList.add('incorrect-answer');
+      }
 
-  // Add feedback after highlighting
-  const feedback = document.getElementById("feedback");
-  if (selected === questions[currentQuestion].correct) {
-    feedback.textContent = "Correct!";
-    correctAnswers++;
-  } else {
-    feedback.textContent = "Incorrect!";
-  }
+      // Add feedback after highlighting
+      const feedback = document.getElementById("feedback");
+      if (selected === questions[currentQuestion].correct) {
+        feedback.textContent = "Correct!";
+        correctAnswers++;
+      } else {
+        feedback.textContent = "Incorrect!";
+      }
 
-  setTimeout(() => {
-    // Remove the highlight and re-enable the hover effect after 2 seconds and move to the next question
-    choices.forEach(choice => {
-      choice.classList.remove('correct-answer');
-      choice.classList.remove('incorrect-answer');
-      choice.style.pointerEvents = '';
-    });
-    moveToNextQuestion();
-  }, 3000);
+      setTimeout(() => {
+        // Remove the highlight and re-enable the hover effect after 2 seconds and move to the next question
+        choices.forEach(choice => {
+          choice.classList.remove('correct-answer');
+          choice.classList.remove('incorrect-answer');
+          choice.style.pointerEvents = '';
+        });
+        moveToNextQuestion();
+      }, 3000);
 }
-
+    // Initialize the quiz with a placeholder message
+    document.getElementById('quiz-title').textContent = ' ';
+    document.getElementById("question-text").textContent = "  ";
   </script>
 </body>
 
