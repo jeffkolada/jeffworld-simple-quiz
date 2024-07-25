@@ -256,7 +256,7 @@
     }
 
     // Function to send analytics
-    function sendAnalytics() {
+    function sendAnalytics(quizResult) {
       parent.postMessage({ 
           action: 'send-results', 
           result: quizResult,
@@ -276,7 +276,6 @@
 
       let quizResult;
       if (selected === selectedQuestion.correct) {
-        correctAnswers++;
         quizResult = 1; // Correct answer
       } else {
         choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
