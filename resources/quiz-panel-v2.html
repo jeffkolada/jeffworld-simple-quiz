@@ -60,17 +60,30 @@
           max-width: 550px; /* Set maximum width */
           height: 60px; /* Set a fixed height */
           box-sizing: border-box;
+          transition: background-color 0.2s ease; /* Smooth transition for background color */
       }
 
       .choice:hover {
           background-color: #4a5056;
       }
 
+      .choice.disable-hover:hover {
+          background-color: #393939; /* Disable hover effect */
+      }
+
+      .correct-answer {
+          background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
+      }
+
+      .incorrect-answer {
+        background-color: rgba(210, 47, 47, 0.567); /* Highlight incorrect answer with red color */
+      }
+
       .feedback-container {
           position: relative;
           width: 400px; /* Fill the width of the container */
-          height: 30px; /* Set a fixed height for the spacer */
-          margin-top: 10px; /* Add some spacing above the feedback */
+          height: 20px; /* Set a fixed height for the spacer */
+          margin-top: 1px; /* Add some spacing above the feedback */
           background-color: rgba(255, 255, 255, 0); /* 0% opacity */
       }
 
@@ -79,7 +92,7 @@
           top: 0;
           left: 0;
           width: 400px;
-          height: 30px;
+          height: 20px;
           background-color: rgba(255, 255, 255, 0);
       }
 
@@ -87,7 +100,7 @@
           position: relative;
           z-index: 1; /* Ensure it appears above the background */
           margin: 0; /* Remove default margin */
-          line-height: 30px; /* Center text vertically */
+          line-height: 20px; /* Center text vertically */
           width: 100%; /* Fill the width of the container */
       }
 
@@ -136,14 +149,14 @@
     <h1 id="quiz-title"></h1>
     <div class="question">
       <p id="question-text"></p>
-      <div class="choices">
-        <button class="choice" onclick="checkAnswer(0)"></button>
-        <button class="choice" onclick="checkAnswer(1)"></button>
-        <button class="choice" onclick="checkAnswer(2)"></button>
-        <div class="feedback-container">
-          <div class="feedback-background"></div>
-          <p id="feedback" class="feedback-content"></p>
-        </div>
+      <div class="choices" id="choices-container">
+        <!-- Choice buttons will be dynamically created here -->
+      </div>
+      <div class="feedback-container">
+        <div class="feedback-background"></div>
+        <p id="feedback" class="feedback-content"></p>
+      </div>
+    </div>
   </div>
   <script>
     let analyticsKey = 'null';
@@ -158,9 +171,9 @@
         questions = event.data.content; // Directly use the passed object
         analyticsKey = event.data.analytics; // Update the analytics key
         timerOn = event.data.timerOn || false; // Update the timer status
+        timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
         endMessageWin = event.data.endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose; // Update the end message
-        timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
 
 // Debugging logs
 //        console.log('timerOn:', timerOn);
@@ -187,9 +200,15 @@
         const questionText = document.getElementById("question-text");
         questionText.textContent = questions[currentQuestion].question;
 
-        const choices = document.querySelectorAll(".choice");
-        choices.forEach((choice, index) => {
-          choice.textContent = questions[currentQuestion].choices[index];
+        const choicesContainer = document.getElementById("choices-container");
+        choicesContainer.innerHTML = ''; // Clear existing choices
+
+        questions[currentQuestion].choices.forEach((choice, index) => {
+          const button = document.createElement('button');
+          button.className = 'choice';
+          button.textContent = choice;
+          button.onclick = () => checkAnswer(index);
+          choicesContainer.appendChild(button);
         });
 
         const feedback = document.getElementById("feedback");
@@ -201,36 +220,40 @@
         } else {
           document.getElementById("timer-bar-container").style.display = "none";
         }
+      } else {
+        const questionText = document.getElementById("question-text");
+        questionText.textContent = "No questions available. Please reload the quiz...";
       }
     }
+
 
       // Function to start the countdown timer
     function startTimer() {
       const timerBar = document.getElementById("timer-bar");
-      timerBar.style.transition = 'none'; // Disable transition to reset width
-      timerBar.style.width = '0%'; // Reset width to 0%
+      timerBar.style.transition = 'none';                                               // Disable transition to reset width
+      timerBar.style.width = '0%';                                                      // Reset width to 0%
       
       // Force a reflow to apply the initial width immediately
       timerBar.offsetWidth; 
 
-      timerBar.style.transition = `width ${timerDuration}s linear`; // Set the transition duration
-      timerBar.style.width = '100%'; // Set the width to 100% to trigger the transition
+      timerBar.style.transition = `width ${timerDuration}s linear`;                     // Set the transition duration
+      timerBar.style.width = '100%';                                                    // Set the width to 100% to trigger the transition
 
-      clearTimeout(timerInterval); // Clear any existing timeout
+      clearTimeout(timerInterval);                                                      // Clear any existing timeout
 
       timerInterval = setTimeout(() => {
-        moveToNextQuestion(); // Move to the next question if the timer runs out
-      }, timerDuration * 1000); // Wait for the duration of the timer
+        moveToNextQuestion();                                                           // Move to the next question if the timer runs out
+      }, timerDuration * 1000);                                                         // Wait for the duration of the timer
     }
 
     // Function to stop the countdown timer
     function stopTimer() {
-      clearTimeout(timerInterval); // Clear the timer
+      clearTimeout(timerInterval);                                                      // Clear the timer
       const timerBar = document.getElementById("timer-bar");
       const computedStyle = getComputedStyle(timerBar);
       const width = computedStyle.width;
-      timerBar.style.transition = 'none'; // Remove the transition
-      timerBar.style.width = width; // Set the current width to stop the bar
+      timerBar.style.transition = 'none';                                               // Remove the transition
+      timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
     // Function to move to the next question
@@ -264,20 +287,41 @@
 
     // Function to check answers
     function checkAnswer(selected) {
-      stopTimer(); // Stop the timer when an answer is checked
+  stopTimer(); // Stop the timer when an answer is checked
 
-      const feedback = document.getElementById("feedback");
-      if (selected === questions[currentQuestion].correct) {
-        feedback.textContent = "Correct!";
-        correctAnswers++;
-      } else {
-        feedback.textContent = "Incorrect!";
-      }
+  const choices = document.querySelectorAll(".choice");
 
-      setTimeout(() => {
-        moveToNextQuestion();
-      }, 2000);
-    }
+  // Disable hover effect on all choices by removing the hover style
+  choices.forEach(choice => choice.style.pointerEvents = 'none');
+
+  // Highlight the correct answer immediately
+  choices[questions[currentQuestion].correct].classList.add('correct-answer');
+
+  // Highlight the chosen incorrect answer, if incorrect
+  if (selected !== questions[currentQuestion].correct) {
+  choices[selected].classList.add('incorrect-answer');
+  }
+
+  // Add feedback after highlighting
+  const feedback = document.getElementById("feedback");
+  if (selected === questions[currentQuestion].correct) {
+    feedback.textContent = "Correct!";
+    correctAnswers++;
+  } else {
+    feedback.textContent = "Incorrect!";
+  }
+
+  setTimeout(() => {
+    // Remove the highlight and re-enable the hover effect after 2 seconds and move to the next question
+    choices.forEach(choice => {
+      choice.classList.remove('correct-answer');
+      choice.classList.remove('incorrect-answer');
+      choice.style.pointerEvents = '';
+    });
+    moveToNextQuestion();
+  }, 3000);
+}
+
   </script>
 </body>
 
