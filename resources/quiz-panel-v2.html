@@ -75,11 +75,15 @@
           background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
       }
 
+      .incorrect-answer {
+        background-color: rgba(210, 47, 47, 0.567); /* Highlight incorrect answer with red color */
+      }
+
       .feedback-container {
           position: relative;
           width: 400px; /* Fill the width of the container */
           height: 20px; /* Set a fixed height for the spacer */
-          margin-top: 10px; /* Add some spacing above the feedback */
+          margin-top: 1px; /* Add some spacing above the feedback */
           background-color: rgba(255, 255, 255, 0); /* 0% opacity */
       }
 
@@ -293,6 +297,11 @@
   // Highlight the correct answer immediately
   choices[questions[currentQuestion].correct].classList.add('correct-answer');
 
+  // Highlight the chosen incorrect answer, if incorrect
+  if (selected !== questions[currentQuestion].correct) {
+  choices[selected].classList.add('incorrect-answer');
+  }
+
   // Add feedback after highlighting
   const feedback = document.getElementById("feedback");
   if (selected === questions[currentQuestion].correct) {
@@ -306,6 +315,7 @@
     // Remove the highlight and re-enable the hover effect after 2 seconds and move to the next question
     choices.forEach(choice => {
       choice.classList.remove('correct-answer');
+      choice.classList.remove('incorrect-answer');
       choice.style.pointerEvents = '';
     });
     moveToNextQuestion();
