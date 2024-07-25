@@ -11,5 +11,5 @@
   "businessId": "hCsur3Hk00",
   "price": 0,
   "releaseNotes": "Added highlight for correct and incorrect answers. Answer buttons are now dynamic and can handle 2, 3 or 4 answer choices per question.",
-  "entrypoint": ""
+  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/aa93ff140e94259d4157fd4f78e0e680/plugin.js"
 }
