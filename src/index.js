@@ -18,7 +18,9 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             description: 'Creates a multiple-choice quiz when the object is clicked.',
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },  
-                { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' },
+                { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.', 
+                    default: '[{"question": "What does the acronym NFT stand for?", "choices": ["Near-Field Teleport", "Non-Fungible Token", "New-Fangled Technology"], "correct": 1}, {"question": "What is the capital of France?", "choices": ["Paris", "London", "Berlin"], "correct": 0}, {"question": "What is the fastest land animal?", "choices": ["Lion", "Cheetah", "Gazelle"], "correct": 1}]'
+                },
                 { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
@@ -37,7 +39,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             description: 'Creates a single question multiple-choice quiz when the object is clicked. If multiple questions are provided, the question can be randomized.',
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },  
-                { id: 'question', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
+                { id: 'question', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.', 
+                    default: '[{"question": "What does the acronym NFT stand for?", "choices": ["Near-Field Teleport", "Non-Fungible Token", "New-Fangled Technology"], "correct": 1}]'},
                 { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
             { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },

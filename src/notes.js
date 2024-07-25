@@ -205,6 +205,50 @@ window.addEventListener('message', function (e) {
     }
 ]
 
+[
+    {
+      "question": "How many answers are there?",
+      "choices": [
+        "One",
+        "Two",
+        "Three",
+        "Four"
+      ],
+      "correct": 3
+    },
+    {
+      "question": "Which number is higher?",
+      "choices": [
+        "69",
+        "420"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "How many legs does a chicken have?",
+      "choices": [
+        "One",
+        "Two",
+        "Threee"
+      ],
+      "correct": 1
+    }
+  ]
+
+
+// SINGLE QUESTION
+
+[
+    {
+        "question": "What does the acronym 'NFT' stand for?",
+        "choices": ["Near-Field Teleport", "Non-Fungible Token", "New-Fangled Technology"],
+        "correct": 1
+    }
+]
+
+
+
+
 
 
 
