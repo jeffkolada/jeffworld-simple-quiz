@@ -60,7 +60,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 //            console.log('Plugin: Message Received from panel!');                                    // Console Log (8)
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
-//            console.log('Plugin: Send Analytics Values: ', analyticsKey, ' : ', result);            // Console Log (9)
+//            console.log('Plugin: Send Analytics Name: ', analyticsKey);            // Console Log (9)
+            console.log('Plugin: Send Analytics Values: ', result);            // Console Log (9)
             this.user.sendAnalytics(analyticsKey, result);
         }
     }

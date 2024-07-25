@@ -165,6 +165,8 @@
     let questions = []; // Initialize as empty array
     let selectedQuestion = null; // Initialize the selected question
     let timerInterval;
+    let quizResult = 0; // Initialize the quiz result
+    let currentQuestion = 0; // Initialize the current question index
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -191,6 +193,7 @@
         showQuestion(); // Refresh the displayed question
       }
     });
+
 
     function showQuestion() {
       if (selectedQuestion) {
@@ -252,6 +255,14 @@
       timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
+    // Function to send analytics
+    function sendAnalytics() {
+      parent.postMessage({ 
+          action: 'send-results', 
+          result: quizResult,
+          analytics: analyticsKey}, '*');
+    }
+
     function checkAnswer(selected) {
       stopTimer(); // Stop the timer when an answer is checked
 
@@ -263,13 +274,25 @@
       // Highlight the correct answer
       choices[selectedQuestion.correct].classList.add('correct-answer');
 
-      if (selected !== selectedQuestion.correct) {
+      let quizResult;
+      if (selected === selectedQuestion.correct) {
+        correctAnswers++;
+        quizResult = 1; // Correct answer
+      } else {
         choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
+        quizResult = 0; // Incorrect answer
       }
 
-      showFeedback(selected === selectedQuestion.correct);
+      // Send the analytics event
+      sendAnalytics(quizResult);
+
+      // Check if this is the last question
+      const isLastQuestion = currentQuestion >= questions.length - 1;
+
+      showFeedback(selected === selectedQuestion.correct, isLastQuestion);
     }
 
+    // Function to display feedback
     function showFeedback(isCorrect) {
       const feedback = document.getElementById("feedback");
       feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
