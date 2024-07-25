@@ -223,26 +223,33 @@
       }
     }
 
-    function startTimer() {
+     // Function to start the countdown timer
+     function startTimer() {
       const timerBar = document.getElementById("timer-bar");
-      timerBar.style.transition = 'none'; // Disable transition to reset width
-      timerBar.style.width = '0%'; // Reset width to 0%
+      timerBar.style.transition = 'none';                                               // Disable transition to reset width
+      timerBar.style.width = '0%';                                                      // Reset width to 0%
       
       // Force a reflow to apply the initial width immediately
       timerBar.offsetWidth; 
 
-      timerBar.style.transition = `width ${timerDuration}s linear`; // Set the transition duration
-      timerBar.style.width = '100%'; // Set the width to 100% to trigger the transition
+      timerBar.style.transition = `width ${timerDuration}s linear`;                     // Set the transition duration
+      timerBar.style.width = '100%';                                                    // Set the width to 100% to trigger the transition
 
-      clearTimeout(timerInterval); // Clear any existing timeout
+      clearTimeout(timerInterval);                                                      // Clear any existing timeout
 
       timerInterval = setTimeout(() => {
-        showFeedback(false); // Time out and show incorrect feedback
-      }, timerDuration * 1000); // Wait for the duration of the timer
+        moveToNextQuestion();                                                           // Move to the next question if the timer runs out
+      }, timerDuration * 1000);                                                         // Wait for the duration of the timer
     }
 
+    // Function to stop the countdown timer
     function stopTimer() {
-      clearTimeout(timerInterval); // Clear the timer
+      clearTimeout(timerInterval);                                                      // Clear the timer
+      const timerBar = document.getElementById("timer-bar");
+      const computedStyle = getComputedStyle(timerBar);
+      const width = computedStyle.width;
+      timerBar.style.transition = 'none';                                               // Remove the transition
+      timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
     function checkAnswer(selected) {
