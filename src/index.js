@@ -21,12 +21,13 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.', 
                     default: '[{"question": "What does the acronym NFT stand for?", "choices": ["Near-Field Teleport", "Non-Fungible Token", "New-Fangled Technology"], "correct": 1}, {"question": "What is the capital of France?", "choices": ["Paris", "London", "Berlin"], "correct": 0}, {"question": "What is the fastest land animal?", "choices": ["Lion", "Cheetah", "Gazelle"], "correct": 1}]'
                 },
-                { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
+                { id: 'createQuizButton', name: 'Create Quiz', type: 'button', help: 'Click to create the quiz.' },
+            { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
-                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+            { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'section-timer', name: 'Timer Settings', type: 'section' },
+            { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
             ]
@@ -56,20 +57,28 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
-//        console.log('Plugin onMessage Analytics Key: ', analyticsKey);                              // Console Log (7)
+//        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+//        console.log('Plugin onMessage Analytics Key: ', analyticsKey);         
+
 
         if (msg.action == 'send-results') {
 //            console.log('Plugin: Message Received from panel!');                                    // Console Log (8)
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
-//            console.log('Plugin: Send Analytics Name: ', analyticsKey);            // Console Log (9)
-            console.log('Plugin: Send Analytics Values: ', result);            // Console Log (9)
+            console.log('Plugin: Send Analytics Name: ', analyticsKey);            // Console Log
+            console.log('Plugin: Send Analytics Values: ', result);            // Console Log
             this.user.sendAnalytics(analyticsKey, result);
+        };
+
+        if (msg.action == 'quiz-created') {
+            let quizContent = await msg.quizData;
+            console.log('Plugin: Quiz Data Retrieved', quizContent);                                    // Console Log
+            this.menus.update('quiz-component.questions', { textarea: quizContent });           // STUCK HERE - HOW TO UPDATE THE SETTING DATA WITH THE CREATED QUIZ
         }
     }
 
 }
+
 
 /**
  * Component that creates a Multiple Question multiple-choice quiz.
@@ -133,7 +142,21 @@ class QuizComponent extends BaseComponent {
         }
     }
         
-    
+    async onAction(id) {
+        if (id === 'createQuizButton') {
+        await this.plugin.menus.displayPopup({
+            title: 'Create Quiz',
+            panel: {
+                iframeURL: this.paths.absolute('./quiz-builder.html'),
+                width: 600,
+                height: 700,
+                onClose: () => {
+                    console.log('Quiz Creator closed');
+                }
+            }
+        })
+        }
+    }
     
 }
 
