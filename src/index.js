@@ -96,7 +96,10 @@ class QuizComponent extends BaseComponent {
             return;
         }
 
+        let objectID = this.objectID; // Retrieve the object ID
+        console.log('Object ID:', objectID); // Console Log (Object ID)
         let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+
         try {
             const questionsJson = this.getField('questions');
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
