@@ -13,7 +13,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     onLoad() {
         // Register Multiple Question Quiz component as an attachable component
         this.objects.registerComponent(QuizComponent, {
-            id: 'quiz-component',
+            id: 'quizComponent',
             name: 'Quiz Multiple Questions',
             description: 'Creates a multiple-choice quiz when the object is clicked.',
             settings: obj => [
@@ -35,7 +35,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
         // Register Multiple Question Quiz component as an attachable component
         this.objects.registerComponent(SingleQuizComponent, {
-            id: 'single-quiz-component',
+            id: 'singleQuizComponent',
             name: 'Quiz Single Question',
             description: 'Creates a single question multiple-choice quiz when the object is clicked. If multiple questions are provided, the question can be randomized.',
             settings: obj => [
@@ -62,18 +62,22 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
 
         if (msg.action == 'send-results') {
-//            console.log('Plugin: Message Received from panel!');                                    // Console Log (8)
+//            console.log('Plugin: Message Received from panel!');             // Console Log
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
-            console.log('Plugin: Send Analytics Name: ', analyticsKey);            // Console Log
+            console.log('Plugin: Send Analytics Name: ', analyticsKey);        // Console Log
             console.log('Plugin: Send Analytics Values: ', result);            // Console Log
             this.user.sendAnalytics(analyticsKey, result);
         };
 
         if (msg.action == 'quiz-created') {
             let quizContent = await msg.quizData;
-            console.log('Plugin: Quiz Data Retrieved', quizContent);                                    // Console Log
-            this.menus.update('quiz-component.questions', { textarea: quizContent });           // STUCK HERE - HOW TO UPDATE THE SETTING DATA WITH THE CREATED QUIZ
+            console.log('Plugin: Quiz Data Retrieved', quizContent);           // Console Log
+            this.menus.update('quizComponent', { 
+                    settings: {
+                        questions: quizContent
+                    }
+                 });           
         }
     }
 
