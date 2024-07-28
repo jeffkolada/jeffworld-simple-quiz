@@ -24,7 +24,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'oneTry', name: 'One Try', type: 'checkbox', help: 'If checked, the quiz can only be taken once.', default: false },
+                { id: 'limitResponse', name: 'Limit Response', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'Determine when to limit the quiz to one try.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -45,7 +45,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'oneTry', name: 'One Try', type: 'checkbox', help: 'If checked, the quiz can only be taken once.', default: false },
+                { id: 'limitResponse', name: 'Limit Response', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'Determine when to limit the quiz to one try.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -55,21 +55,22 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-//        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
-//        console.log('Plugin onMessage Analytics Key: ', analyticsKey);                              // Console Log (7)
-
         if (msg.action == 'send-results') {
-//            console.log('Plugin: Message Received from panel!');                                    // Console Log (8)
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
-//            console.log('Plugin: Send Analytics Name: ', analyticsKey);            // Console Log (9)
-            console.log('Plugin: Send Analytics Values: ', result);            // Console Log (9)
+            let allCorrect = await msg.allCorrect;
+            let limitResponse = await msg.limitResponse;
+                console.log('Response Limit: ', limitResponse);
+                console.log('All Correct: ', allCorrect);
+                console.log('Plugin: Send Analytics Values:', result);
             this.user.sendAnalytics(analyticsKey, result);
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
-            await this.user.setProperties({ [quizTakenName]: true });
-            console.log('QuizTaken set to True:', quizTakenName);
+            if (limitResponse === 'Any Finish' || (limitResponse === 'All Correct' && allCorrect)) {
+                await this.user.setProperties({ [quizTakenName]: true });
+                console.log('QuizTaken set to True:', quizTakenName);
+            }
         }
     }
 
@@ -83,23 +84,24 @@ class QuizComponent extends BaseComponent {
     /** Called when the component is clicked */
     async onClick() {
         // Check if the user has already completed the quiz
-        let oneTry = this.getField('oneTry');  // Retrieve the oneTry setting
-        let allCorrectCheck = this.getField('allCorrectCheck');  // Retrieve the allCorrectCheck setting
+        let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         console.log('Properties:', properties);
+        console.log( 'Response Limit: ', limitResponse, ' - ', quizTakenName);
 
-       // If property is undefined, set it to false and retry
-       if (properties === undefined) {
+        // If property is undefined, set it to false and retry
+        if (properties === undefined) {
             await this.plugin.user.setProperties({ [quizTakenName]: false });
             properties = await this.plugin.user.getProperty('', quizTakenName);
         }
-        if ( oneTry && properties === true ) {
+
+        if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
             console.log('User has already completed the quiz');
             this.plugin.menus.toast({
                 text: 'You have already taken this quiz.',
                 duration: 5000
-              });
+            });
             return;
         }
 
@@ -122,9 +124,9 @@ class QuizComponent extends BaseComponent {
             this.isPopupOpen = true; // Set the flag to true
 
 
-            await this.plugin.user.setProperties({ quizTakenName: false });
-            console.log('Quiz set to False:', quizTakenName);
-            console.log('Properties updated:', properties);
+//            await this.plugin.user.setProperties({ quizTakenName: false });
+//            console.log('Quiz set to False:', quizTakenName);
+//            console.log('Properties updated:', properties);
 
             let propertyTaken = await this.plugin.user.getProperty('', 'quiz' + analyticsKey);
             console.log('Property Taken:', propertyTaken);
@@ -149,6 +151,7 @@ class QuizComponent extends BaseComponent {
                     action: 'update-quiz',
                     content: questions,  // Send already parsed object
                     analytics: analyticsKey, // Send analytics key
+                    limitResponse: limitResponse, // Send limit response setting
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     endMessageWin: endMessageWin, // Include the win message in the message
                     endMessageLose: endMessageLose, // Include the lose message in the message
@@ -178,22 +181,29 @@ class SingleQuizComponent extends BaseComponent {
     /** Called when the component is clicked */
     async onClick() {
         // Check if the user has already completed the quiz
-        let oneTry = this.getField('oneTry');  // Retrieve the oneTry setting
+        let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         console.log('Properties:', properties);
-    
+        console.log( 'Response Limit: ', limitResponse, ' - ', quizTakenName);
+
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
             await this.plugin.user.setProperties({ [quizTakenName]: false });
             properties = await this.plugin.user.getProperty('', quizTakenName);
         }
-        if (oneTry && properties === true ) {
+
+        if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
             console.log('User has already completed the quiz');
             this.plugin.menus.toast({
                 text: 'You have already taken this quiz.',
                 duration: 5000
-              });
+            });
+            return;
+        }
+
+        if (this.isPopupOpen) {
+            console.log('Popup is already open'); // Prevent opening another popup
             return;
         }
 
@@ -207,6 +217,7 @@ class SingleQuizComponent extends BaseComponent {
             const endMessageLose = this.getField('endMessageLose') || 'Try again next time'; // Default lose message
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+            const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
             console.log('Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
@@ -232,6 +243,7 @@ class SingleQuizComponent extends BaseComponent {
                     content: questions,  // Send already parsed object
                     randomQuestion: randomQuestion, // Send random question status
                     analytics: analyticsKey, // Send analytics key
+                    limitResponse: limitResponse, // Send limit response setting
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     endMessageWin: endMessageWin, // Include the win message in the message
                     endMessageLose: endMessageLose, // Include the lose message in the message
