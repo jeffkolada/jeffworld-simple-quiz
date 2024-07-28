@@ -22,9 +22,10 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
-            { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+                { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
+                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'limitResponse', name: 'Limit Replay', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken once after the selected quiz result.', default: 'None' },
+                { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -43,9 +44,10 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
+                { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'limitResponse', name: 'Limit Replay', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken once after the selected quiz result.', default: 'None' },
+                { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -83,6 +85,7 @@ class QuizComponent extends BaseComponent {
         let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
+        let gameOverModal = this.getField('gameOverModal');
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -93,8 +96,8 @@ class QuizComponent extends BaseComponent {
         if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
             console.log('User has already completed the quiz');
             this.plugin.menus.toast({
-                text: 'You have already taken this quiz.',
-                duration: 5000
+                text: gameOverModal || 'You have already taken this quiz.',
+                duration: 3000
             });
             return;
         }
@@ -170,6 +173,7 @@ class SingleQuizComponent extends BaseComponent {
         let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
+        let gameOverModal = this.getField('gameOverModal');
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -180,8 +184,8 @@ class SingleQuizComponent extends BaseComponent {
         if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
             console.log('User has already completed the quiz');
             this.plugin.menus.toast({
-                text: 'You have already taken this quiz.',
-                duration: 5000
+                text: gameOverModal || 'You have already taken this quiz.',
+                duration: 3000
             });
             return;
         }
