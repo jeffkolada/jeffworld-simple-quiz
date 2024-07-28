@@ -67,9 +67,9 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             this.user.sendAnalytics(analyticsKey, result);
 
             // Mark the quiz as completed
-            let quizTakenName = analyticsKey;
-            await this.user.setProperties('', { taken: 'true', quiz: quizTakenName });
-            console.log('Quiz set to True:', quizTakenName);
+            let quizTakenName = 'quiz' + analyticsKey;
+            await this.user.setProperties({ [quizTakenName]: true });
+            console.log('QuizTaken set to True:', quizTakenName);
         }
     }
 
@@ -84,14 +84,19 @@ class QuizComponent extends BaseComponent {
     async onClick() {
         // Check if the user has already completed the quiz
         let oneTry = this.getField('oneTry');  // Retrieve the oneTry setting
-        let quizTakenName = this.getField('analyticsKey'); 
+        let allCorrectCheck = this.getField('allCorrectCheck');  // Retrieve the allCorrectCheck setting
+        let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
+        let properties = await this.plugin.user.getProperty('', quizTakenName);
+        console.log('Properties:', properties);
 
-//        let properties = await this.plugin.user.getProperties('');
-//        console.log('Properties:', properties);
-    
-        if (oneTry && properties.taken === 'true' && properties.quiz === quizTakenName) {
+       // If property is undefined, set it to false and retry
+       if (properties === undefined) {
+            await this.plugin.user.setProperties({ [quizTakenName]: false });
+            properties = await this.plugin.user.getProperty('', quizTakenName);
+        }
+        if ( oneTry && properties === true ) {
             console.log('User has already completed the quiz');
-            this.menus.toast({
+            this.plugin.menus.toast({
                 text: 'You have already taken this quiz.',
                 duration: 5000
               });
@@ -117,11 +122,11 @@ class QuizComponent extends BaseComponent {
             this.isPopupOpen = true; // Set the flag to true
 
 
-            this.plugin.user.setProperties('', { taken: 'false', quiz: quizTakenName });
+            await this.plugin.user.setProperties({ quizTakenName: false });
             console.log('Quiz set to False:', quizTakenName);
             console.log('Properties updated:', properties);
 
-            let propertyTaken = await this.plugin.user.getProperty('', 'taken');
+            let propertyTaken = await this.plugin.user.getProperty('', 'quiz' + analyticsKey);
             console.log('Property Taken:', propertyTaken);
 
             const popupId = await this.plugin.menus.displayPopup({
@@ -174,13 +179,18 @@ class SingleQuizComponent extends BaseComponent {
     async onClick() {
         // Check if the user has already completed the quiz
         let oneTry = this.getField('oneTry');  // Retrieve the oneTry setting
-        let quizTakenName = this.getField('analyticsKey'); 
-        let properties = await this.plugin.user.getProperties('');
+        let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
+        let properties = await this.plugin.user.getProperty('', quizTakenName);
         console.log('Properties:', properties);
     
-        if (oneTry && properties.taken === 'true' && properties.quiz === quizTakenName) {
+        // If property is undefined, set it to false and retry
+        if (properties === undefined) {
+            await this.plugin.user.setProperties({ [quizTakenName]: false });
+            properties = await this.plugin.user.getProperty('', quizTakenName);
+        }
+        if (oneTry && properties === true ) {
             console.log('User has already completed the quiz');
-            this.menus.toast({
+            this.plugin.menus.toast({
                 text: 'You have already taken this quiz.',
                 duration: 5000
               });
@@ -200,11 +210,6 @@ class SingleQuizComponent extends BaseComponent {
             console.log('Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
-            
-            // Mark the quiz as taken
-            await this.plugin.user.setProperties('', { taken: 'false', quiz: quizTakenName });
-            console.log('Quiz set to False:', quizTakenName);
-            console.log('Properties updated:', properties);
 
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Popup Quiz',

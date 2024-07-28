@@ -596,3 +596,36 @@ export async function saveString(key: string, value: string): Promise<boolean> {
     }
 
 
+
+
+            // Update state values
+            StateBridge.shared.state.campaignID = this.getField('campaign_id') || '',
+            StateBridge.shared.state.channel = this.getField('points_channel') || 'emojiswap',
+
+
+
+
+        // Tutorial has been completed before, so no need to display again
+        if (localStorage['tutorial.complete']) {
+            return
+        }
+
+        /** Called when the user closes the tutorial popup */
+        close = () => {
+            this.hideUI()
+            localStorage['tutorial.complete'] = true
+        }
+
+
+
+        { id: 'oneTry', name: 'Only One Try', type: 'checkbox', help: 'When enabled, the quiz can only be taken one time.' },
+        this.getComponentField(obj, 'quiz-component', 'oneTry') == true
+            ? { id: 'media-player-name', name: 'Media Player Name', type: 'select-item', help: 'Name of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' }
+            : { id: 'media-player-id', name: 'Media Player ID', type: 'input', help: 'Identifier of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' },
+
+
+        { id: 'select-name', name: 'Select Via Name', type: 'checkbox', help: 'When enabled, it allows for selection of the media player by its name rather than identifier.' },
+        this.getComponentField(obj, 'media-button', 'select-name') == true
+            ? { id: 'media-player-name', name: 'Media Player Name', type: 'select-item', help: 'Name of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' }
+            : { id: 'media-player-id', name: 'Media Player ID', type: 'input', help: 'Identifier of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' },
+    
