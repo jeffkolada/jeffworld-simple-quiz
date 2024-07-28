@@ -45,7 +45,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'limitResponse', name: 'Limit Response', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'Determine when to limit the quiz to one try.', default: 'None' },
+                { id: 'limitResponse', name: 'Limit Retake', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz can only be taken once.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -60,16 +60,12 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
             let limitResponse = await msg.limitResponse;
-                console.log('Response Limit: ', limitResponse);
-                console.log('All Correct: ', allCorrect);
-                console.log('Plugin: Send Analytics Values:', result);
             this.user.sendAnalytics(analyticsKey, result);
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
             if (limitResponse === 'Any Finish' || (limitResponse === 'All Correct' && allCorrect)) {
                 await this.user.setProperties({ [quizTakenName]: true });
-                console.log('QuizTaken set to True:', quizTakenName);
             }
         }
     }
@@ -87,8 +83,6 @@ class QuizComponent extends BaseComponent {
         let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
-        console.log('Properties:', properties);
-        console.log( 'Response Limit: ', limitResponse, ' - ', quizTakenName);
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -123,11 +117,6 @@ class QuizComponent extends BaseComponent {
             
             this.isPopupOpen = true; // Set the flag to true
 
-
-//            await this.plugin.user.setProperties({ quizTakenName: false });
-//            console.log('Quiz set to False:', quizTakenName);
-//            console.log('Properties updated:', properties);
-
             let propertyTaken = await this.plugin.user.getProperty('', 'quiz' + analyticsKey);
             console.log('Property Taken:', propertyTaken);
 
@@ -146,7 +135,6 @@ class QuizComponent extends BaseComponent {
     
         // Send the quiz data to the panel
             setTimeout(() => {
-//                console.log('Component Analytics Key Sent:', analyticsKey);                         // Console Log (3)
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
                     content: questions,  // Send already parsed object
@@ -161,8 +149,6 @@ class QuizComponent extends BaseComponent {
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
-//            console.log('Component Popup ID:', popupId);                                            // Console Log (1)
-//            console.log('Component Question Sent:', questions);                                     // Console Log (2)
         } catch (error) {
             console.error('Error parsing questions:', error);
             this.isPopupOpen = false; // Reset the flag in case of an error
@@ -184,8 +170,6 @@ class SingleQuizComponent extends BaseComponent {
         let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
-        console.log('Properties:', properties);
-        console.log( 'Response Limit: ', limitResponse, ' - ', quizTakenName);
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -218,7 +202,7 @@ class SingleQuizComponent extends BaseComponent {
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
-            console.log('Panel Opened');                                                                  // Console Log ()
+            console.log('Quiz Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
@@ -237,7 +221,6 @@ class SingleQuizComponent extends BaseComponent {
     
         // Send the quiz data to the panel
             setTimeout(() => {
-//                console.log('Component Analytics Key Sent:', analyticsKey);                         // Console Log (3)
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
                     content: questions,  // Send already parsed object
@@ -253,8 +236,6 @@ class SingleQuizComponent extends BaseComponent {
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
-//            console.log('Component Popup ID:', popupId);                                            // Console Log (1)
-//            console.log('Component Question Sent:', questions);                                     // Console Log (2)
         } catch (error) {
             console.error('Error parsing questions:', error);
             this.isPopupOpen = false; // Reset the flag in case of an error

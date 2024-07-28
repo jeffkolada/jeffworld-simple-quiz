@@ -259,11 +259,13 @@
 
     // Function to send analytics
     function sendAnalytics(quizResult) {
+      const allCorrect = quizResult === 1;
       parent.postMessage({ 
           action: 'send-results', 
           result: quizResult,
           analytics: analyticsKey,
-          limitResponse: limitResponse}, '*');
+          allCorrect: allCorrect,
+          limitResponse: limitResponse,}, '*');
     }
 
     function checkAnswer(selected) {

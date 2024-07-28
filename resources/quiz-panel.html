@@ -177,11 +177,6 @@
         endMessageWin = event.data.endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose; // Update the end message
 
-// Debugging logs
-//        console.log('timerOn:', timerOn);
-//        console.log('messageCorrect:', endMessageWin);
-//        console.log('messageIncorrect:', endMessageLose);
-
         const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
           quizTitleElement.textContent = event.data.quizTitle || 'Multiple Choice Quiz';
@@ -268,10 +263,6 @@
         const allCorrect = correctAnswers === questions.length;
         const resultMessage = `You got ${correctAnswers} out of ${questions.length} questions correct.`;
         const additionalMessage = allCorrect ? endMessageWin : endMessageLose;
-
-// Debugging logs
-//    console.log('resultMessage:', resultMessage);
-//    console.log('additionalMessage:', additionalMessage);
 
     quizContainer.innerHTML = `<p>${resultMessage}</p><p>${additionalMessage}</p>`;
         console.log('Quiz Finished: ', correctAnswers);
