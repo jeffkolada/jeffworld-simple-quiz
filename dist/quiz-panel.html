@@ -164,21 +164,18 @@
     let timerDuration = 10; // Default timer duration if not provided
     let endMessageWin = 'Congratulations! You answered all questions correctly!';
     let endMessageLose = 'Keep practicing to improve your score.';
+    let limitResponse = 'None'; // Initialize limitResponse to None
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
         questions = event.data.content; // Directly use the passed object
         analyticsKey = event.data.analytics; // Update the analytics key
+        limitResponse = event.data.limitResponse; // Update the limit response status
         timerOn = event.data.timerOn || false; // Update the timer status
         timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
         endMessageWin = event.data.endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose; // Update the end message
-
-// Debugging logs
-//        console.log('timerOn:', timerOn);
-//        console.log('messageCorrect:', endMessageWin);
-//        console.log('messageIncorrect:', endMessageLose);
 
         const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
@@ -267,10 +264,6 @@
         const resultMessage = `You got ${correctAnswers} out of ${questions.length} questions correct.`;
         const additionalMessage = allCorrect ? endMessageWin : endMessageLose;
 
-// Debugging logs
-//    console.log('resultMessage:', resultMessage);
-//    console.log('additionalMessage:', additionalMessage);
-
     quizContainer.innerHTML = `<p>${resultMessage}</p><p>${additionalMessage}</p>`;
         console.log('Quiz Finished: ', correctAnswers);
         sendAnalytics();
@@ -279,10 +272,13 @@
 
     // Function to send analytics
     function sendAnalytics() {
+      const allCorrect = correctAnswers === questions.length; // Calculate allCorrect
       parent.postMessage({ 
           action: 'send-results', 
           result: correctAnswers,
-          analytics: analyticsKey}, '*');
+          analytics: analyticsKey,
+          allCorrect: allCorrect,
+          limitResponse: limitResponse}, '*');
     }
 
     // Function to check answers

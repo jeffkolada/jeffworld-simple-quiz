@@ -167,6 +167,7 @@
     let timerInterval;
     let quizResult = 0; // Initialize the quiz result
     let currentQuestion = 0; // Initialize the current question index
+    let limitResponse; // Initialize the limit response
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -178,6 +179,7 @@
         endMessageWin = event.data.endMessageWin || endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose || endMessageLose; // Update the end message
         randomQuestion = event.data.randomQuestion || randomQuestion; // Update the random question flag
+        limitResponse = event.data.limitResponse || limitResponse; // Update the limit response
 
         // Select a random question if the flag is true
         if (randomQuestion && questions.length > 0) {
@@ -257,10 +259,13 @@
 
     // Function to send analytics
     function sendAnalytics(quizResult) {
+      const allCorrect = quizResult === 1;
       parent.postMessage({ 
           action: 'send-results', 
           result: quizResult,
-          analytics: analyticsKey}, '*');
+          analytics: analyticsKey,
+          allCorrect: allCorrect,
+          limitResponse: limitResponse,}, '*');
     }
 
     function checkAnswer(selected) {

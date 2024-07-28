@@ -205,6 +205,50 @@ window.addEventListener('message', function (e) {
     }
 ]
 
+[
+    {
+      "question": "How many answers are there?",
+      "choices": [
+        "One",
+        "Two",
+        "Three",
+        "Four"
+      ],
+      "correct": 3
+    },
+    {
+      "question": "Which number is higher?",
+      "choices": [
+        "69",
+        "420"
+      ],
+      "correct": 1
+    },
+    {
+      "question": "How many legs does a chicken have?",
+      "choices": [
+        "One",
+        "Two",
+        "Threee"
+      ],
+      "correct": 1
+    }
+  ]
+
+
+// SINGLE QUESTION
+
+[
+    {
+        "question": "What does the acronym 'NFT' stand for?",
+        "choices": ["Near-Field Teleport", "Non-Fungible Token", "New-Fangled Technology"],
+        "correct": 1
+    }
+]
+
+
+
+
 
 
 
@@ -307,3 +351,281 @@ class QuizComponent extends BaseComponent {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+onLoad() {
+    this.hooks.addHandler('controls.key.down', this.onKeyDown)
+    this.hooks.addHandler('controls.key.up', this.onKeyUp)
+
+    // Get current user identifier
+    this.user.getID().then(uid => this.userID = uid)
+
+    // Register overlay
+    this.menus.register({
+        id: this.menuID,
+        section: 'overlay-top',
+        panel: {
+            iframeURL: this.paths.absolute('ui-build/panel/index.html'),
+            pointerEvents: 'none',
+        },
+    })
+
+    // Retrieve all available actions
+    this.getActions().then(() => {
+
+        // Use names as values
+        const values = this.actions.map(act => act.name)
+
+        // Register settings
+        this.menus.register({
+            id: 'radial-wheel-settings',
+            section: 'plugin-settings',
+            panel: {
+                fields: [
+                    { type: 'section', id: 'options', name: 'Options' },
+                    { id: 'slot-1', name: 'Slot 1', type: 'two-stack', help: 'Action that will be assigned to the first slot.',
+                        heightBetween: 5,
+                        first: { type: 'select', values: values },
+                        second: { type: 'bind-key', boundTo: this.assigned[1]?.key || '', onKeyBound: key => this.onKeyBound(key, 'slot-1') },
+                    },
+                    { id: 'slot-2', name: 'Slot 2', type: 'two-stack', help: 'Action that will be assigned to the second slot.',
+                        heightBetween: 5,
+                        first: { type: 'select', values: values },
+                        second: { type: 'bind-key', boundTo: this.assigned[2]?.key || '', onKeyBound: key => this.onKeyBound(key, 'slot-2') },
+                    },
+                ]
+            }
+        })
+
+    })
+}
+
+
+
+    /** Opens the radial wheel, if not already open */
+    open() {
+        // Do not open if already opened
+        if (this.isOpen) {
+            return
+        }
+
+        // Open wheel
+        this.isOpen = true
+        this.menus.update(this.menuID, { panel: { pointerEvents: 'auto' } })
+        this.menus.postMessage({ action: 'create-wheel' })
+    }
+
+
+
+// ON LOAD
+
+     // Register overlay
+     this.menus.register({
+        id: this.menuID,
+        section: 'overlay-top',
+        panel: {
+            iframeURL: this.paths.absolute('ui-build/panel/index.html'),
+            pointerEvents: 'none',
+        },
+    })
+
+
+    open() {
+        // Do not open if already opened
+        if (this.isOpen) {
+            return
+        }
+
+        this.menus.update(this.menuID, { 
+            panel: { 
+                pointerEvents: 'auto' 
+            } 
+        })
+    }
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Saves a string to storage.
+ *
+ * @param key The key to fetch.
+ * @param value The value to store.
+ */
+export async function saveString(key: string, value: string): Promise<boolean> {
+    try {
+      // await AsyncStorage.setItem(key, value)
+      storage.set(key, value)
+      return true
+    } catch {
+      // return false
+      throw new Error('Unable to save to local storage')
+    }
+  }
+
+
+
+/**
+  * Loads a string from storage.
+  *
+  * @param key The key to fetch.
+  */
+ export async function loadString(key: string): Promise<string | null> {
+   try {
+     const str = storage.getString(key)
+     return str === undefined ? null : Promise.resolve(str)
+   } catch {
+     // not sure why this would fail... even reading the RN docs I'm unclear
+     return null
+   }
+ }
+
+
+
+
+
+
+
+
+
+    async onMessage(data) {
+        let userID = await this.plugin.user.getID()
+
+        if (userID == data.fromInstance) {
+
+            if (data.action == 'update-name') {
+                let props = {}
+                props.npcName = data.value
+                
+                await this.plugin.objects.update(this.objectID, props, true)
+            
+            }
+
+            if (data.action == 'editor-load') {
+
+                // Get data
+                let name = this.fields.npcName || null
+                let radius = this.fields.npcRadius || null
+
+                // Load script
+                let script = this.loadScript()
+                this.plugin.menus.postMessage({ action: 'load-script', src: script, name: name, radius: radius })
+
+                // Load animations
+                this.loadAnimations()
+            }
+        }
+    }
+
+
+    loadScript(){
+        let script = "[]"
+
+        if (this.fields.script) {
+            script = JSON.stringify(this.fields.script)
+        }
+        
+        return script
+    }
+
+    async saveScript(data){
+
+        if (data.list) {
+
+            let props = {}
+            
+            props.script = JSON.parse(data.list);
+
+            this.closePopup()
+
+            this.plugin.menus.postMessage({ action: 'close-popup' })
+
+            this.visible = false
+            this.settingsOpen = false
+            this.editUser = null
+            this.step = 0
+            this.scriptItem = null
+            this.waitingClick = false
+            this.waitingPopupClick = false
+            this.waitingButtonClick = false
+            this.popupOpen = false
+            this.infoOverlayID = null
+            this.clickedPopup = false
+            this.clickedButton = false
+            this.npcPosition = {x: this.fields.x, y: this.fields.height, z: this.fields.y}
+            this.scriptStarted = false
+            this.killScript = true
+
+            await this.plugin.updateComponent(this.objectID, props, this.fields.components)
+            this.playScript(this.fields.script, this.step)
+
+        }
+    }
+
+    async updateScript(data){
+
+        if (data.list) {
+            
+            this.latestScript = data
+
+        }
+    }
+
+
+
+
+            // Update state values
+            StateBridge.shared.state.campaignID = this.getField('campaign_id') || '',
+            StateBridge.shared.state.channel = this.getField('points_channel') || 'emojiswap',
+
+
+
+
+        // Tutorial has been completed before, so no need to display again
+        if (localStorage['tutorial.complete']) {
+            return
+        }
+
+        /** Called when the user closes the tutorial popup */
+        close = () => {
+            this.hideUI()
+            localStorage['tutorial.complete'] = true
+        }
+
+
+
+        { id: 'oneTry', name: 'Only One Try', type: 'checkbox', help: 'When enabled, the quiz can only be taken one time.' },
+        this.getComponentField(obj, 'quiz-component', 'oneTry') == true
+            ? { id: 'media-player-name', name: 'Media Player Name', type: 'select-item', help: 'Name of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' }
+            : { id: 'media-player-id', name: 'Media Player ID', type: 'input', help: 'Identifier of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' },
+
+
+        { id: 'select-name', name: 'Select Via Name', type: 'checkbox', help: 'When enabled, it allows for selection of the media player by its name rather than identifier.' },
+        this.getComponentField(obj, 'media-button', 'select-name') == true
+            ? { id: 'media-player-name', name: 'Media Player Name', type: 'select-item', help: 'Name of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' }
+            : { id: 'media-player-id', name: 'Media Player ID', type: 'input', help: 'Identifier of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' },
+    
