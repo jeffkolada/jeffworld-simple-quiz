@@ -24,7 +24,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'limitResponse', name: 'Limit Response', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'Determine when to limit the quiz to one try.', default: 'None' },
+                { id: 'limitResponse', name: 'Limit Replay', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken once after the selected quiz result.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -38,14 +38,14 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             description: 'Creates a single question multiple-choice quiz when the object is clicked. If multiple questions are provided, the question can be randomized.',
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },  
-                { id: 'question', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
+                { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
                 { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
             { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                { id: 'limitResponse', name: 'Limit Retake', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz can only be taken once.', default: 'None' },
+                { id: 'limitResponse', name: 'Limit Replay', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken once after the selected quiz result.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
@@ -193,7 +193,7 @@ class SingleQuizComponent extends BaseComponent {
 
         let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
         try {
-            const questionsJson = this.getField('question');
+            const questionsJson = this.getField('questions');
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
             const randomQuestion = this.getField('question-random'); // Retrieve the random question status
             const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
