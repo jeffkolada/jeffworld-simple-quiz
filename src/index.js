@@ -169,7 +169,7 @@ class QuizComponent extends BaseComponent {
         await this.plugin.menus.displayPopup({
             title: 'Quiz Creator Help Guide',
             panel: {
-                iframeURL: this.paths.absolute('./README.txt'),
+                iframeURL: this.paths.absolute('./help-panel.html'),
                 width: 600,
                 height: 650,
                 onClose: () => {
@@ -272,7 +272,7 @@ class SingleQuizComponent extends BaseComponent {
         this.plugin.menus.displayPopup({
             title: 'Quiz Creator Help Guide',
             panel: {
-                iframeURL: this.paths.absolute('./README.txt'),
+                iframeURL: this.paths.absolute('./help-panel.html'),
                 width: 600,
                 height: 650,
                 onClose: () => {
