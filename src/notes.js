@@ -629,3 +629,51 @@ export async function saveString(key: string, value: string): Promise<boolean> {
             ? { id: 'media-player-name', name: 'Media Player Name', type: 'select-item', help: 'Name of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' }
             : { id: 'media-player-id', name: 'Media Player ID', type: 'input', help: 'Identifier of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' },
     
+
+
+
+
+    async onLoad() {
+
+        // Register component
+        this.objects.registerComponent(NPCComponent, {
+            id: 'npc',
+            name: 'NPC',
+            description: 'Allows admin users to implement NPC character.',
+            settings: [
+                { id: 'script', name: 'Change script', type: 'button', help: "Edit the NPC character's script."},
+                { id: 'disabled', name: 'Disabled', type: 'checkbox', help: 'Disables execution of the script on this object.' },
+            ]
+        })
+    }
+
+
+/** Called when an action button is pressed by an admin */
+async onAction(id) {
+
+    if (id == 'script') {
+        // Load current script
+        this.editorID = null
+        // Register and open script editor
+        // Register the overlay UI
+        this.editorID = this.plugin.menus.displayPopup({
+            section: 'overlay-custom',
+            panel: {
+                iframeURL: this.plugin.paths.absolute('Script Editor.html'),
+                width: '90%',
+                left: '5%',
+                pointerEvents: 'all'
+            }
+        }) 
+        this.plugin.npcs?.forEach(comp => {
+            if (comp.editUser == this.plugin.userID) {
+                comp.settingsOpen = false
+                comp.editUser = null
+            }          
+        })
+        this.editUser = this.plugin.userID
+        this.settingsOpen = true
+        this.toastID = null
+    }
+
+}
