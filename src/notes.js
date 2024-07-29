@@ -629,3 +629,69 @@ export async function saveString(key: string, value: string): Promise<boolean> {
             ? { id: 'media-player-name', name: 'Media Player Name', type: 'select-item', help: 'Name of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' }
             : { id: 'media-player-id', name: 'Media Player ID', type: 'input', help: 'Identifier of the media player object. Leaving this blank will default button to nearest media player (within 20 metres).' },
     
+
+
+
+
+    async onLoad() {
+
+        // Register component
+        this.objects.registerComponent(NPCComponent, {
+            id: 'npc',
+            name: 'NPC',
+            description: 'Allows admin users to implement NPC character.',
+            settings: [
+                { id: 'script', name: 'Change script', type: 'button', help: "Edit the NPC character's script."},
+                { id: 'disabled', name: 'Disabled', type: 'checkbox', help: 'Disables execution of the script on this object.' },
+            ]
+        })
+    }
+
+
+/** Called when an action button is pressed by an admin */
+async onAction(id) {
+
+    if (id == 'script') {
+        // Load current script
+        this.editorID = null
+        // Register and open script editor
+        // Register the overlay UI
+        this.editorID = this.plugin.menus.displayPopup({
+            section: 'overlay-custom',
+            panel: {
+                iframeURL: this.plugin.paths.absolute('Script Editor.html'),
+                width: '90%',
+                left: '5%',
+                pointerEvents: 'all'
+            }
+        }) 
+        this.plugin.npcs?.forEach(comp => {
+            if (comp.editUser == this.plugin.userID) {
+                comp.settingsOpen = false
+                comp.editUser = null
+            }          
+        })
+        this.editUser = this.plugin.userID
+        this.settingsOpen = true
+        this.toastID = null
+    }
+
+}
+
+
+vatom.lock
+{
+    "id": "jeffworldquiz",
+    "name": "Simple Quiz",
+    "version": "1.3.0",
+    "beta": true,
+    "pluginType": "Business",
+    "description": "Attach a simple quiz popup to any object.",
+    "longDescription": "Attach a simple quiz popup to any object in order to create gamified experiences. Two components are included, a Multiple Question Quiz and a Single Question Quiz.",
+    "configuration": "Add 'Quiz: Multiple Questions' or 'Quiz: Single Question' component to any object. See Help Guide in Component for more info. The quiz questions should be represented as a JSON array, with each question being an object within this array. Each question object should include (1) 'question': A string representing the quiz question. (2) 'choices': An array of strings, each string representing a possible answer choice. (3) 'correct': An integer representing the index of the correct answer in the choices array.",
+    "category": "Games",
+    "businessId": "hCsur3Hk00",
+    "price": 0,
+    "releaseNotes": "Prevent re-taking the quiz after it's completed.",
+    "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/8f2f717cc9bde442ca8e0163d415f1bf/plugin.js"
+  }

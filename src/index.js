@@ -28,7 +28,9 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
-                { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
+                { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10}, 
+                { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
+                { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' }
             ]
         });
 
@@ -49,11 +51,14 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
                 { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
-                { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
-                { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10} 
+                { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
+                { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
+            { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
+                { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' }
             ]
         });
     }
+
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
@@ -158,7 +163,22 @@ class QuizComponent extends BaseComponent {
         }
     }
         
-    
+    async onAction(id) {
+        if (id == 'helpGuide') {
+        console.log('Open the Help Guide');
+        await this.plugin.menus.displayPopup({
+            title: 'Quiz Creator Help Guide',
+            panel: {
+                iframeURL: this.paths.absolute('./help-panel.html'),
+                width: 720,
+                height: 640,
+                onClose: () => {
+                    console.log("Help Guide closed");
+                },
+            }
+        });
+        }
+    }
     
 }
 
@@ -246,7 +266,22 @@ class SingleQuizComponent extends BaseComponent {
         }
     }
         
-    
+    async onAction(id) {
+        if (id == 'helpGuide') {
+        console.log('Open the Help Guide');
+        this.plugin.menus.displayPopup({
+            title: 'Quiz Creator Help Guide',
+            panel: {
+                iframeURL: this.paths.absolute('./help-panel.html'),
+                width: 720,
+                height: 640,
+                onClose: () => {
+                    console.log("Help Guide closed");
+                },
+            }
+        });
+        }
+    }
     
 }
 

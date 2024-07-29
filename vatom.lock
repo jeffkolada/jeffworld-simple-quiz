@@ -1,15 +1,15 @@
 {
   "id": "jeffworldquiz",
   "name": "Simple Quiz",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "beta": true,
   "pluginType": "Business",
-  "description": "A simple quiz component",
-  "longDescription": "A simple quiz component",
-  "configuration": "Configure in component settings",
+  "description": "Attach a simple quiz popup to any object.",
+  "longDescription": "Attach a simple quiz popup to any object in order to create gamified experiences. Two components are included, a Multiple Question Quiz and a Single Question Quiz.",
+  "configuration": "Add 'Quiz: Multiple Questions' or 'Quiz: Single Question' component to any object. See Help Guide in Component for more info. The quiz questions should be represented as a JSON array, with each question being an object within this array. Each question object should include (1) 'question': A string representing the quiz question. (2) 'choices': An array of strings, each string representing a possible answer choice. (3) 'correct': An integer representing the index of the correct answer in the choices array.",
   "category": "Games",
   "businessId": "hCsur3Hk00",
   "price": 0,
-  "releaseNotes": "Prevent re-taking the quiz after it's completed.",
-  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/8f2f717cc9bde442ca8e0163d415f1bf/plugin.js"
+  "releaseNotes": "Added Help Guide to Component",
+  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/6c51f1345575298829d6b08e32a008d6/plugin.js"
 }
