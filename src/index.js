@@ -170,8 +170,8 @@ class QuizComponent extends BaseComponent {
             title: 'Quiz Creator Help Guide',
             panel: {
                 iframeURL: this.paths.absolute('./help-panel.html'),
-                width: 600,
-                height: 650,
+                width: 720,
+                height: 640,
                 onClose: () => {
                     console.log("Help Guide closed");
                 },
@@ -273,8 +273,8 @@ class SingleQuizComponent extends BaseComponent {
             title: 'Quiz Creator Help Guide',
             panel: {
                 iframeURL: this.paths.absolute('./help-panel.html'),
-                width: 600,
-                height: 650,
+                width: 720,
+                height: 640,
                 onClose: () => {
                     console.log("Help Guide closed");
                 },

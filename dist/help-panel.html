@@ -16,10 +16,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
             background-color: #121212;
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
         }
+
         header {
             background-color: #1F1F1F;
             color: #e0e0e0;
@@ -29,6 +31,23 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        .content {
+            padding: 20px;
+            background-color: #1E1E1E;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
         h1 {
             color: #e0e0e0;
             font-weight: 600;
@@ -43,17 +62,13 @@
             color: #bcbcbc;
             font-weight: 300;
         }
+        li {
+            color: #bcbcbc;
+            font-weight: 300;
+        }
 
         b {
             font-weight: 400;
-        }
-        .content {
-            padding: 20px;
-            background-color: #1E1E1E;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            width: 80%;
-            max-width: 600px;
-            border-radius: 8px;
         }
         pre {
             background-color: #2E2E2E;
@@ -82,31 +97,38 @@
     </style>
 </head>
 <body>
-
+<div class="main-content">
 <div class="content">
     <h1>JEFFWORLD Simple Quiz Plugin</h1>
     <h2>Question Content</h2>
-    <p>To customize your quiz, use the format below. There is no limit on the number of questions, however you must use <b>three</b> answer options per question.
-        </p>
-    <p> When choosing the correct answer, start from value 0 for the first answer. In the example below, "Non-Fungible Token" is the correct answer, and the "correct" value is 0. If the second answer is correct, use value of 1.
+    <p>To customize your quiz, use the JSON Array format below. Each question is an object in the array. There is no limit on the number of questions, you must provide 2-4 answer choices per question. 
         </p>
     <pre><code>
-    [
-        {
-            "question": "What is the largest mammal in the world?",
-            "choices": ["Elephant", "Blue Whale", "Giraffe"],
-            "correct": 1
-        },
-        {
-            "question": "Which bird is known for its impressive ability to mimic sounds, including human speech?",
-            "choices": ["Parrot", "Owl", "Eagle"],
-            "correct": 0
-        }
-    ]
-        </code></pre>
+[
+    {
+        "question": "What is the largest mammal in the world?",
+        "choices": ["Elephant", "Blue Whale", "Giraffe"],
+        "correct": 1
+    },
+    {
+        "question": "Which bird is known for its impressive ability to mimic sounds, including human speech?",
+        "choices": ["Parrot", "Owl", "Eagle"],
+        "correct": 0
+    }
+]
+    </code></pre>
+    <p><b>Structure:</b> The quiz should be represented as a JSON array. Each question is an object within this array.</p>
+    <p>Each <b>Question Object</b> should include:</p>
+    <ul>
+        <li><b>question:</b> A string representing the quiz question.</li>
+        <li><b>choices:</b> An array of strings, each string representing a possible answer choice.</li>
+        <li><b>correct:</b> An integer representing the index of the correct answer in the choices array.</li>
+    </ul>
+    <p> When choosing the correct answer, start from value 0 for the first answer. In the example below, "Blue Whale" is the correct answer, and the "correct" value is 0. If the second answer is correct, use value of 1.
+        </p>
     
     <h2>Analytics Value</h2>
-    <p>To send a trigger to Vatom Studio custom event, provide an <b>event value</b> for your quiz. The studio configuration will define the "value" or number of correct answers required.
+    <p>Set an <b>Analytics Name</b> to send an Analytics Event to Vatom Studio and/or set the quiz instance to prevent re-taking.
         </p>
     <h2>Limit Re-Takes</h2>
     <p>You can prevent users from re-taking the quiz either after completing it with any score, or only after getting all answers correct. Use the <b>Limit Replay After:</b> setting to <b>Any Finish</b> or <b>All Correct</b> and then set an Analytics Name. 
@@ -114,11 +136,41 @@
     <p>The <b>Analytics Name</b> will hold the state of whether the user has taken the quiz or not. If you change the analytics name, users can take the quiz again.
         </p>
     <h2>Single Question Quiz</h2>
-    <p>The 'Quiz - Single Question' component allows you to have a single question quiz. This can be a single set question, or it can pick a random question a set provided.
+    <p>The 'Quiz - Single Question' component allows you to have a single question quiz. This can be a single set question, or it can pick a random question a set provided. By default the single quiz will take the first question in the list.
         </p>
-
+    <h2>One More Example Quiz</h2>
+    <p>This quiz has five questions about metaverse and NFT technologies.</p>
+    <pre><code>
+[
+    {
+        "question": "What does NFT stand for?",
+        "choices": ["Non-Fungible Token", "Network File Transfer", "Next Financial Technology"],
+        "correct": 0
+    },
+    {
+        "question": "Which blockchain network is most commonly used for NFTs?",
+        "choices": ["Bitcoin", "Dogecoin", "Etherium"],
+        "correct": 2
+    },
+    {
+        "question": "What is the primary purpose of NFTs?",
+        "choices": ["Cryptocurrency transactions", "Representing ownership or proof of authenticity", "Cloud storage"],
+        "correct": 1
+    },
+    {
+        "question": "What does the term 'Metaverse' refer to?",
+        "choices": ["A type of cryptocurrency", "A virtual universe combining augmented reality, virtual reality, and the internet", "A social media platform"],
+        "correct": 1
+    },
+    {
+        "question": "What is a common use case for NFTs in the Metaverse?",
+        "choices": ["Creating digital art and collectibles", "Streaming video content", "Online shopping"],
+        "correct": 0
+    }
+]
+            </code></pre>
 
 </div>
-
+</div>
 </body>
 </html>
