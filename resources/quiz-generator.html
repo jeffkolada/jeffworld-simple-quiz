@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Question Creator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400&display=swap');
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #000000;
+      color: aliceblue;
+      margin: 0;
+      padding: 25px;
+      box-sizing: border-box;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .panel {
+      box-sizing: border-box;
+      width: calc(100% - 50px);
+      max-width: 600px;
+      padding: 2em;
+      background-color: #191919;
+      border-radius: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: calc(100% - 50px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .panel h3 {
+      margin-bottom: 20px;
+    }
+
+    .panel input[type="text"] {
+      width: calc(100% - 50px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #2b2b2b;
+      border-radius: 4px;
+      background-color: #393939;
+      color: white;
+    }
+
+    .panel .question-input {
+      height: 40px;
+    }
+
+    .choice-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        width: calc(100% - 50px);
+    }
+
+    .choice-container input[type="radio"] {
+        display: none;
+    }
+
+    .choice-container input[type="radio"] + label {
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .choice-container input[type="radio"] + label::before {
+        content: '';
+        padding: 6px;
+        width: 14px;
+        height: 14px;
+        border: 1px solid #2b2b2b;
+        border-radius: 4px;
+        background: #393939;
+        margin-right: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .choice-container input[type="radio"]:checked + label::before {
+        content: '✓'; /* Adding the checkmark */
+        color: white;
+        font-size: 24px;
+        border-color: #28a745;
+        background-color: #28a745;
+    }
+
+    .choice-container input[type="text"] {
+        flex-grow: 1;
+        height: 20px; /* Ensure this matches the height of the radio button */
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .panel button {
+      padding: 10px 20px;
+      margin: 10px 0;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .panel button:hover {
+      background-color: #0056b3;
+    }
+
+    .panel button.generate-json {
+        background-color: #28a745; /* Green color */
+    }
+
+    .panel button.generate-json:hover {
+        background-color: #218838; /* Darker green on hover */
+    }
+
+    .panel::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .panel::-webkit-scrollbar-track {
+      background: #2c2c2c; /* Dark track background */
+      border-radius: 10px;
+    }
+
+    .panel::-webkit-scrollbar-thumb {
+      background: #555; /* Darker thumb color */
+      border-radius: 10px;
+      border: 2px solid #2c2c2c; /* Adds padding around the thumb */
+    }
+
+    .panel::-webkit-scrollbar-thumb:hover {
+      background: #888; /* Lighten thumb on hover */
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        }
+    
+    .tooltip {
+      margin-top: 10px;
+      color: green;
+    }
+
+    .question-list {
+        width: calc(100% - 50px);
+        text-align: left;
+        margin-top: 20px;
+        font-weight: 600; /* Regular font weight */
+        font-size: 0.9em; /* Smaller font size */
+        color: #d3d3d3; /* Off-white color */
+    }
+
+    .question-item {
+        cursor: pointer;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #282828;
+        border-radius: 4px;
+    }
+
+    .question-item h4 {
+        margin: 0;
+    }
+
+    .answer-list {
+        display: none;
+        margin-top: 10px;
+        padding-left: 20px;
+        font-weight: 100;
+        color: rgb(180, 180, 180)
+    }
+
+    .answer-list li {
+        margin-bottom: 5px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h3>Create Quiz Question</h3>
+    <input type="text" id="question" placeholder="Enter your question" class="question-input">
+    <div class="choice-container">
+      <input type="radio" id="choice0-radio" name="correctAnswer" value="0">
+      <label for="choice0-radio"><input type="text" id="choice0" placeholder="Choice 1"></label>
+    </div>
+    <div class="choice-container">
+      <input type="radio" id="choice1-radio" name="correctAnswer" value="1">
+      <label for="choice1-radio"><input type="text" id="choice1" placeholder="Choice 2"></label>
+    </div>
+    <div class="choice-container">
+      <input type="radio" id="choice2-radio" name="correctAnswer" value="2">
+      <label for="choice2-radio"><input type="text" id="choice2" placeholder="Choice 3"></label>
+    </div>
+    <div class="choice-container">
+      <input type="radio" id="choice3-radio" name="correctAnswer" value="3">
+      <label for="choice3-radio"><input type="text" id="choice3" placeholder="Choice 4"></label>
+    </div>
+    <button id="saveQuestion">Save Question</button>
+    <div class="question-list" id="questionList"></div>
+    <div class="action-buttons">
+      <button id="generateJson" class="generate-json" style="display: none;">Copy to Clipboard</button>
+      <button id="saveQuiz" class="save-quiz" style="display: none;">Save to Component</button>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+  </div>
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const questions = [];
+  const questionInput = document.getElementById('question');
+  const choiceInputs = [
+    document.getElementById('choice0'),
+    document.getElementById('choice1'),
+    document.getElementById('choice2'),
+    document.getElementById('choice3')
+  ];
+  const correctAnswerInputs = document.getElementsByName('correctAnswer');
+  const tooltip = document.getElementById('tooltip');
+  const questionList = document.getElementById('questionList');
+  const generateJsonButton = document.getElementById('generateJson');
+  const saveQuizButton = document.getElementById('saveQuiz');
+
+  document.getElementById('saveQuestion').addEventListener('click', () => {
+    const question = questionInput.value;
+    const choices = choiceInputs.map(input => input.value).filter(choice => choice);
+    let correctAnswer = null;
+    correctAnswerInputs.forEach(input => {
+      if (input.checked) {
+        correctAnswer = parseInt(input.value);
+      }
+    });
+
+    if (question && choices.length > 0 && correctAnswer !== null) {
+      const newQuestion = {
+        question: question,
+        choices: choices,
+        correct: correctAnswer
+      };
+      questions.push(newQuestion);
+      addQuestionToList(newQuestion, questions.length - 1);
+      questionInput.value = '';
+      choiceInputs.forEach(input => input.value = '');
+      correctAnswerInputs.forEach(input => input.checked = false);
+      generateJsonButton.style.display = 'inline-block'; // Show the 'Generate JSON' button
+      saveQuizButton.style.display = 'inline-block'; // Show the 'Save Quiz to Component' button
+    } else {
+      alert('Please fill in all fields and select the correct answer.');
+    }
+  });
+
+  function addQuestionToList(question, index) {
+    const questionItem = document.createElement('div');
+    questionItem.className = 'question-item';
+    questionItem.innerHTML = `<h4>${question.question}</h4>`;
+    questionItem.addEventListener('click', () => {
+      const answerList = questionItem.querySelector('.answer-list');
+      if (answerList) {
+        answerList.style.display = answerList.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+
+    const answerList = document.createElement('ul');
+    answerList.className = 'answer-list';
+    question.choices.forEach((choice, i) => {
+      const answerItem = document.createElement('li');
+      answerItem.textContent = choice + (i === question.correct ? ' (Correct)' : '');
+      answerList.appendChild(answerItem);
+    });
+
+    questionItem.appendChild(answerList);
+    questionList.appendChild(questionItem);
+  }
+
+  generateJsonButton.addEventListener('click', () => {
+    const jsonString = JSON.stringify(questions, null, 2);
+    navigator.clipboard.writeText(jsonString).then(() => {
+      tooltip.textContent = 'Copied to clipboard!';
+      setTimeout(() => tooltip.textContent = '', 2000);
+    });
+  });
+
+  saveQuizButton.addEventListener('click', () => {
+    parent.postMessage({
+      action: 'quiz-created',
+      quizData: questions,
+    }, '*');
+    console.log('Sending Data: ', questions);     // Console log the questions array
+  });
+});
+
+
+  </script>
+</body>
+</html>
