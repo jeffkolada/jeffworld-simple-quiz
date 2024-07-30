@@ -78,23 +78,13 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             }
         }
 
+        // When a new quiz is created with the quiz generator, update the quiz content
         if (msg.action == 'quiz-created') {
             let newQuizContent = await msg.quizData;
             console.log('Received New Quiz: ', newQuizContent);
-
-            await navigator.clipboard.writeText(newQuizContent)
-                .then(() => {
-                    console.log('Quiz Copied to Clipboard: ', newQuizContent);
-                })
-                .catch((error) => {
-                    console.error('Failed to copy text: ', error);
-                });
-
-            copyToClipboard();
-
+//            this.menus.update('single-quiz-component', { questions: newQuizContent });
         }
     }
-
 }
 
 /**
