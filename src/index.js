@@ -30,7 +30,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10}, 
                 { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
-                { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' }
+                { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' },
+                { id: 'createQuiz', name: 'Create Quiz', type: 'button', help: 'Widget for creating a quiz in JSON Object Format' }
             ]
         });
 
@@ -54,7 +55,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
             { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
-                { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' }
+                { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' },
+                { id: 'createQuiz', name: 'Create Quiz', type: 'button', help: 'Widget for creating a quiz in JSON Object Format' }
             ]
         });
     }
@@ -74,6 +76,22 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             if (limitResponse === 'Any Finish' || (limitResponse === 'All Correct' && allCorrect)) {
                 await this.user.setProperties({ [quizTakenName]: true });
             }
+        }
+
+        if (msg.action == 'quiz-created') {
+            let newQuizContent = await msg.quizData;
+            console.log('Received New Quiz: ', newQuizContent);
+
+            await navigator.clipboard.writeText(newQuizContent)
+                .then(() => {
+                    console.log('Quiz Copied to Clipboard: ', newQuizContent);
+                })
+                .catch((error) => {
+                    console.error('Failed to copy text: ', error);
+                });
+
+            copyToClipboard();
+
         }
     }
 
@@ -178,6 +196,21 @@ class QuizComponent extends BaseComponent {
             }
         });
         }
+
+        if (id == 'createQuiz') {
+            console.log('Quiz Creator Opened');
+            await this.plugin.menus.displayPopup({
+                title: 'Create Quiz',
+                panel: {
+                    iframeURL: this.paths.absolute('./quiz-generator.html'),
+                    width: 600,
+                    height: 620,
+                    onClose: () => {
+                        console.log("Quiz Creator closed");
+                    },
+                }
+            });
+        }
     }
     
 }
@@ -280,6 +313,21 @@ class SingleQuizComponent extends BaseComponent {
                 },
             }
         });
+        }
+
+        if (id == 'createQuiz') {
+            console.log('Quiz Creator Opened');
+            await this.plugin.menus.displayPopup({
+                title: 'Create Quiz',
+                panel: {
+                    iframeURL: this.paths.absolute('./quiz-generator.html'),
+                    width: 600,
+                    height: 620,
+                    onClose: () => {
+                        console.log("Quiz Creator closed");
+                    },
+                }
+            });
         }
     }
     
