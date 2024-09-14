@@ -57,11 +57,25 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' }
             ]
         });
+
+        // Register Live Quiz Admin Button
+        this.menus.register({
+            id: 'simple-quiz-live-button',
+            text: 'Live Quiz',
+            section: 'admin-panel',
+            adminOnly: true,
+            icon: this.paths.absolute('./quiz-admin-icon.png'),
+            action: this.onQuizAdminPress.bind(this)
+        });
     }
 
+    /** Called when a message is received */
+    async onMessage(msg, fromUserID) {
 
-    // When quiz is finished, send Analytics event with Results
-    async onMessage(msg) {
+        // Check message type
+        if (msg.action == 'show-msg'){
+            this.onShowLiveQuiz(msg, fromUserID)
+        }
         if (msg.action == 'send-results') {
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
@@ -76,6 +90,69 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             }
         }
     }
+
+    /** Called when the user presses the System Alert button */
+    async onQuizAdminPress() {
+
+        // Ask user for message
+        const msg = await this.menus.prompt({
+            title: 'Message Everyone',
+            text: 'Enter a message. This message will be displayed to everyone in the space currently.'
+        })
+
+        // No message to send
+        if (!msg) {
+            return
+        }
+
+        // Send message
+        this.messages.send({ action: 'show-msg', text: 'Take the Quiz?' }, true);
+        console.log(msg)
+    }
+
+
+    /** Called when we receive a message to display text */
+    async onShowLiveQuiz(msg, fromUserID) {
+
+        // Show toast
+        console.debug('[System Alert] Displaying message from ' + fromUserID + ': ' + msg.text)
+        const toastID = await this.menus.toast({ 
+            text: msg.text,
+            buttonText: 'Take Quiz',
+            buttonAction: () => { 
+                console.log('Accepted Quiz') 
+                this.openQuizPanel()
+            },
+            buttonCancelText: 'Close',
+            buttonCancelAction: () => { 
+                console.log('Cancelled Quiz'),
+                this.menus.toast({ 
+                    text: 'Quiz Cancelled',
+                    duration: 2000
+                })
+            }, 
+            duration: 10000
+        })
+        console.log('Toast ID: ' + toastID)
+    }
+
+    openQuizPanel = () => {
+        const popupId = this.menus.displayPopup({
+            title: 'Multiple Choice Quiz',
+            panel: {
+                iframeURL: this.paths.absolute('./quiz-panel.html'),
+                width: 600,
+                height: 650,
+                onClose: () => {
+                    console.log("Popup closed");
+                    this.isPopupOpen = false; // Reset the flag when the popup is closed
+                },
+            }
+        });
+        console.log('Popup ID: ' + popupId)
+    }
+
+    
 
 }
 
@@ -159,7 +236,11 @@ class QuizComponent extends BaseComponent {
     
         } catch (error) {
             console.error('Error parsing questions:', error);
-            this.isPopupOpen = false; // Reset the flag in case of an error
+            this.isPopupOpen = false;
+            this.plugin.menus.toast({ 
+                text: 'Error loading quiz. Please check the quiz data.',
+                duration: 5000
+            });
         }
     }
         
@@ -262,7 +343,11 @@ class SingleQuizComponent extends BaseComponent {
     
         } catch (error) {
             console.error('Error parsing questions:', error);
-            this.isPopupOpen = false; // Reset the flag in case of an error
+            this.isPopupOpen = false;
+            this.plugin.menus.toast({ 
+                text: 'Error loading quiz. Please check the quiz data.',
+                duration: 5000
+            });
         }
     }
         
