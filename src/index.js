@@ -11,6 +11,38 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     /** Called on load */
     onLoad() {
+                // Register  Live Quiz Configuration Button
+                this.menus.register({
+                    icon: this.paths.absolute('./quiz-admin-icon.png'),
+                    text: 'Edit Live Quiz',
+                    section: 'file-menu',
+                    action: () => 
+                        this.menus.displayPopup({
+                            panel: {
+                                fields: [
+                                    { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },  
+                                    { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
+                                    { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
+                                { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
+                                    { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },
+                                    { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
+                                    { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
+                                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+                                    { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
+                                    { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
+                                { id: 'section-timer', name: 'Timer Settings', type: 'section' },
+                                    { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
+                                    { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
+                                { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
+                                    { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' },
+                                ],
+                                onClose: () => {
+                                    console.log("Editor Closed: Changes Saved");
+                                },
+                            }    
+                    })   
+                    });
+
         // Register Multiple Question Quiz component as an attachable component
         this.objects.registerComponent(QuizComponent, {
             id: 'quiz-component',
@@ -34,7 +66,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             ]
         });
 
-        // Register Multiple Question Quiz component as an attachable component
+        // Register Single Question Quiz component as an attachable component
         this.objects.registerComponent(SingleQuizComponent, {
             id: 'single-quiz-component',
             name: 'Quiz Single Question',
@@ -66,7 +98,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             adminOnly: true,
             icon: this.paths.absolute('./quiz-admin-icon.png'),
             action: this.onQuizAdminPress.bind(this)
-        });
+        })
+
     }
 
     /** Called when a message is received */
@@ -97,7 +130,10 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
         // Ask user for message
         const msg = await this.menus.prompt({
             title: 'Message Everyone',
-            text: 'Enter a message. This message will be displayed to everyone in the space currently.'
+            inputType: 'text',
+            icon: 'question',
+            initialValue: 'Live Quiz',
+            placeholder: 'Live Quiz',
         })
 
         // No message to send
@@ -137,10 +173,52 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     }
 
     openQuizPanel = () => {
+
+        // Check if the user has already completed the quiz
+        let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
+        let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
+        let properties = this.user.getProperty('', quizTakenName);
+        let gameOverModal = this.getField('gameOverModal');
+
+        // If property is undefined, set it to false and retry
+        if (properties === undefined) {
+            this.user.setProperties({ [quizTakenName]: false });
+            properties = this.user.getProperty('', quizTakenName);
+        }
+
+        if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
+            console.log('User has already completed the quiz');
+            this.menus.toast({
+                text: gameOverModal || 'You have already taken this quiz.',
+                duration: 3000
+            });
+            return;
+        }
+
+        if (this.isPopupOpen) {
+            console.log('Popup is already open'); // Prevent opening another popup
+            return;
+        }
+
+        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+        try {
+            const questionsJson = this.getField('questions');
+            const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
+            const randomQuestion = this.getField('question-random'); // Retrieve the random question status
+            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
+            const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered correctly!'; // Default win message
+            const endMessageLose = this.getField('endMessageLose') || 'Try again next time'; // Default lose message
+            const timerOn = this.getField('timerOn'); // Retrieve the timer status
+            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+            const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
+            console.log('Quiz Panel Opened');                                                                  // Console Log ()
+            
+            this.isPopupOpen = true; // Set the flag to true
+
         const popupId = this.menus.displayPopup({
             title: 'Multiple Choice Quiz',
             panel: {
-                iframeURL: this.paths.absolute('./quiz-panel.html'),
+                iframeURL: this.paths.absolute('./quiz-panel-singlequestion.html'),
                 width: 600,
                 height: 650,
                 onClose: () => {
@@ -149,11 +227,36 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 },
             }
         });
-        console.log('Popup ID: ' + popupId)
+        console.log('Popup ID: ' + popupId);
+
+        // Send the quiz data to the panel
+        setTimeout(() => {
+            console.log('Sending Quiz Data');
+            this.menus.postMessage({
+                action: 'update-quiz',
+                content: questions,  // Send already parsed object
+                randomQuestion: randomQuestion, // Send random question status
+                analytics: analyticsKey, // Send analytics key
+                limitResponse: limitResponse, // Send limit response setting
+                quizTitle: quizTitle,  // Include the quiz title in the message
+                endMessageWin: endMessageWin, // Include the win message in the message
+                endMessageLose: endMessageLose, // Include the lose message in the message
+                timerOn: timerOn, // Include the timer status in the message
+                timerDuration: timerDuration, // Include the timer duration in the message
+                popupID: popupId
+            });
+        }, 400) // Delaying the message to ensure the iframe is fully loaded
+    
+    } catch (error) {
+        console.error('Error parsing questions:', error);
+        this.isPopupOpen = false;
+        this.menus.toast({ 
+            text: 'Error loading quiz. Please check the quiz data.',
+            duration: 5000
+        });
     }
 
-    
-
+}
 }
 
 /**
