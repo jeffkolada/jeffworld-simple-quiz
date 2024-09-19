@@ -84,6 +84,34 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
  */
 class QuizComponent extends BaseComponent {
 
+    async onMessage(msg) {
+        const analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+        const questionsJson = this.getField('questions');
+        const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
+        const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
+        const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
+        const endMessageLose = this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
+        const timerOn = this.getField('timerOn'); // Retrieve the timer status
+        const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+            
+        if (msg.action == 'panel-load') {
+            console.log('Message Received: Panel Loaded');
+            this.plugin.menus.postMessage({
+                action: 'update-quiz',
+                content: questions,  // Send already parsed object
+                analytics: analyticsKey, // Send analytics key
+                limitResponse: limitResponse, // Send limit response setting
+                quizTitle: quizTitle,  // Include the quiz title in the message
+                endMessageWin: endMessageWin, // Include the win message in the message
+                endMessageLose: endMessageLose, // Include the lose message in the message
+                timerOn: timerOn, // Include the timer status in the message
+                timerDuration: timerDuration, // Include the timer duration in the message
+                popupID: popupId
+            });
+        }
+    }
+
+
     /** Called when the component is clicked */
     async onClick() {
         // Check if the user has already completed the quiz
@@ -112,15 +140,9 @@ class QuizComponent extends BaseComponent {
             return;
         }
 
-        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+        
         try {
-            const questionsJson = this.getField('questions');
-            const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
-            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
-            const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
-            const endMessageLose = this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
-            const timerOn = this.getField('timerOn'); // Retrieve the timer status
-            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+            
             console.log('Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
@@ -140,22 +162,6 @@ class QuizComponent extends BaseComponent {
                     },
                 }
             });
-    
-        // Send the quiz data to the panel
-            setTimeout(() => {
-                this.plugin.menus.postMessage({
-                    action: 'update-quiz',
-                    content: questions,  // Send already parsed object
-                    analytics: analyticsKey, // Send analytics key
-                    limitResponse: limitResponse, // Send limit response setting
-                    quizTitle: quizTitle,  // Include the quiz title in the message
-                    endMessageWin: endMessageWin, // Include the win message in the message
-                    endMessageLose: endMessageLose, // Include the lose message in the message
-                    timerOn: timerOn, // Include the timer status in the message
-                    timerDuration: timerDuration, // Include the timer duration in the message
-                    popupID: popupId
-                });
-            }, 600); // Delaying the message to ensure the iframe is fully loaded
     
         } catch (error) {
             console.error('Error parsing questions:', error);
@@ -186,6 +192,35 @@ class QuizComponent extends BaseComponent {
  * Component that creates a Multiple Question multiple-choice quiz.
  */
 class SingleQuizComponent extends BaseComponent {
+    
+    async onMessage(msg) {
+        const questionsJson = this.getField('questions');
+        const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
+        const randomQuestion = this.getField('question-random'); // Retrieve the random question status
+        const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
+        const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered correctly!'; // Default win message
+        const endMessageLose = this.getField('endMessageLose') || 'Try again next time'; // Default lose message
+        const timerOn = this.getField('timerOn'); // Retrieve the timer status
+        const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+        const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
+        const analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+
+        if (msg.action == 'panel-load') {
+            this.plugin.menus.postMessage({
+                action: 'update-quiz',
+                content: questions,  // Send already parsed object
+                randomQuestion: randomQuestion, // Send random question status
+                analytics: analyticsKey, // Send analytics key
+                limitResponse: limitResponse, // Send limit response setting
+                quizTitle: quizTitle,  // Include the quiz title in the message
+                endMessageWin: endMessageWin, // Include the win message in the message
+                endMessageLose: endMessageLose, // Include the lose message in the message
+                timerOn: timerOn, // Include the timer status in the message
+                timerDuration: timerDuration, // Include the timer duration in the message
+                popupID: popupId
+            });
+        }
+    };
 
     /** Called when the component is clicked */
     async onClick() {
@@ -215,17 +250,8 @@ class SingleQuizComponent extends BaseComponent {
             return;
         }
 
-        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
+
         try {
-            const questionsJson = this.getField('questions');
-            const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
-            const randomQuestion = this.getField('question-random'); // Retrieve the random question status
-            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
-            const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered correctly!'; // Default win message
-            const endMessageLose = this.getField('endMessageLose') || 'Try again next time'; // Default lose message
-            const timerOn = this.getField('timerOn'); // Retrieve the timer status
-            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
-            const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
             console.log('Quiz Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
@@ -243,28 +269,13 @@ class SingleQuizComponent extends BaseComponent {
                 }
             });
     
-        // Send the quiz data to the panel
-            setTimeout(() => {
-                this.plugin.menus.postMessage({
-                    action: 'update-quiz',
-                    content: questions,  // Send already parsed object
-                    randomQuestion: randomQuestion, // Send random question status
-                    analytics: analyticsKey, // Send analytics key
-                    limitResponse: limitResponse, // Send limit response setting
-                    quizTitle: quizTitle,  // Include the quiz title in the message
-                    endMessageWin: endMessageWin, // Include the win message in the message
-                    endMessageLose: endMessageLose, // Include the lose message in the message
-                    timerOn: timerOn, // Include the timer status in the message
-                    timerDuration: timerDuration, // Include the timer duration in the message
-                    popupID: popupId
-                });
-            }, 600); // Delaying the message to ensure the iframe is fully loaded
-    
         } catch (error) {
             console.error('Error parsing questions:', error);
             this.isPopupOpen = false; // Reset the flag in case of an error
         }
     }
+
+    
         
     async onAction(id) {
         if (id == 'helpGuide') {

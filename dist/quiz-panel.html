@@ -159,7 +159,7 @@
     </div>
   </div>
   <script>
-    let analyticsKey = 'null';
+    let analyticsKey = '';
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
     let endMessageWin = 'Congratulations! You answered all questions correctly!';
@@ -169,6 +169,7 @@
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
+        console.log('Quiz Content Received: ', event.data);
         questions = event.data.content; // Directly use the passed object
         analyticsKey = event.data.analytics; // Update the analytics key
         limitResponse = event.data.limitResponse; // Update the limit response status
@@ -317,6 +318,11 @@
         moveToNextQuestion();
       }, 3000);
 }
+
+// Request data from the parent window when the panel (popup) loads
+    parent.postMessage({ action: 'panel-load' }, '*');
+    console.log('Message Sent: Quiz Panel Loaded');
+
     // Initialize the quiz with a placeholder message
     document.getElementById('quiz-title').textContent = ' ';
     document.getElementById("question-text").textContent = "  ";

@@ -172,6 +172,7 @@
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
+        console.log('Message Received: ', event.data);
         questions = event.data.content || []; // Use provided questions
         analyticsKey = event.data.analytics || analyticsKey; // Update the analytics key
         timerOn = event.data.timerOn || timerOn; // Update the timer status
@@ -301,6 +302,10 @@
       const feedback = document.getElementById("feedback");
       feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
     }
+
+    // Request data from the parent window when the panel (popup) loads
+    parent.postMessage({ action: 'panel-load' }, '*');
+    console.log('Message Sent: Quiz Panel Loaded');
 
     // Initialize the quiz with a placeholder message
     document.getElementById('quiz-title').textContent = ' ';
