@@ -1,6 +1,6 @@
 // Import necessary modules
 import { BasePlugin, BaseComponent } from 'vatom-spaces-plugins'
-
+import QuizComponent from './QuizComponent'
 
 export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
@@ -11,37 +11,37 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     /** Called on load */
     onLoad() {
-                // Register  Live Quiz Configuration Button
-                this.menus.register({
-                    icon: this.paths.absolute('./quiz-admin-icon.png'),
-                    text: 'Edit Live Quiz',
-                    section: 'file-menu',
-                    action: () => 
-                        this.menus.displayPopup({
-                            panel: {
-                                fields: [
-                                    { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },  
-                                    { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
-                                    { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
-                                { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
-                                    { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },
-                                    { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
-                                    { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
-                                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
-                                    { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
-                                    { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
-                                { id: 'section-timer', name: 'Timer Settings', type: 'section' },
-                                    { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
-                                    { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
-                                { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
-                                    { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' },
-                                ],
-                                onClose: () => {
-                                    console.log("Editor Closed: Changes Saved");
-                                },
-                            }    
-                    })   
-                    });
+        // Register  Live Quiz Configuration Button
+        this.menus.register({
+            icon: this.paths.absolute('./quiz-admin-icon.png'),
+            text: 'Live Quiz',
+            section: 'admin-panel',
+            action: () => 
+                this.menus.displayPopup({
+                    panel: {
+                        fields: [
+                            { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },  
+                            { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
+                            { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
+                        { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
+                            { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },
+                            { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
+                            { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
+                        { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+                            { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
+                            { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
+                        { id: 'section-timer', name: 'Timer Settings', type: 'section' },
+                            { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
+                            { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
+                        { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
+                            { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' },
+                        ],
+                        onClose: () => {
+                            console.log("Editor Closed: Changes Saved");
+                        },
+                    }    
+            })   
+            });
 
         // Register Multiple Question Quiz component as an attachable component
         this.objects.registerComponent(QuizComponent, {
