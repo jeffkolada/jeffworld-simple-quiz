@@ -2,7 +2,7 @@
 import { BasePlugin, BaseComponent } from 'vatom-spaces-plugins'
 
 
-export default class LiveQuizExtension extends BasePlugin {
+export default class LiveQuizExtension extends BaseComponent {
 
     /** Called when the plugin is loaded */
     async onLoad() {
