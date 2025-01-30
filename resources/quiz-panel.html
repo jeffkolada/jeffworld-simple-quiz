@@ -165,6 +165,8 @@
     let endMessageWin = 'Congratulations! You answered all questions correctly!';
     let endMessageLose = 'Keep practicing to improve your score.';
     let limitResponse = 'None'; // Initialize limitResponse to None
+    let actionID = 'null';
+    let userID = 'null';
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -176,6 +178,8 @@
         timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
         endMessageWin = event.data.endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose; // Update the end message
+        actionID = event.data.actionID; // Update the object ID
+        userID = event.data.userID; // Update the user ID
 
         const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
@@ -278,7 +282,9 @@
           result: correctAnswers,
           analytics: analyticsKey,
           allCorrect: allCorrect,
-          limitResponse: limitResponse}, '*');
+          limitResponse: limitResponse,
+          userID: userID,
+          actionID: this.actionID  }, '*');
     }
 
     // Function to check answers

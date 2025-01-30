@@ -168,6 +168,8 @@
     let quizResult = 0; // Initialize the quiz result
     let currentQuestion = 0; // Initialize the current question index
     let limitResponse; // Initialize the limit response
+    let actionID = 'null';
+    let userID = 'null';
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -180,6 +182,8 @@
         endMessageLose = event.data.endMessageLose || endMessageLose; // Update the end message
         randomQuestion = event.data.randomQuestion || randomQuestion; // Update the random question flag
         limitResponse = event.data.limitResponse || limitResponse; // Update the limit response
+        actionID = event.data.actionID; // Update the object ID
+        userID = event.data.userID; // Update the user ID
 
         // Select a random question if the flag is true
         if (randomQuestion && questions.length > 0) {
@@ -265,7 +269,9 @@
           result: quizResult,
           analytics: analyticsKey,
           allCorrect: allCorrect,
-          limitResponse: limitResponse,}, '*');
+          limitResponse: limitResponse,
+          userID: userID,
+          actionID: this.actionID  }, '*');
     }
 
     function checkAnswer(selected) {
