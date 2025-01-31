@@ -65,6 +65,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
         if (msg.action == 'send-results') {
+            console.log('Message received in Quiz plugin: ', msg);
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
@@ -74,9 +75,9 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
             this.user.sendAnalytics(analyticsKey, result);
             console.log('Analytics Event Sent: ', analyticsKey, result);
-            
-            await this.plugin.hooks.trigger('jeffworld.actions.play', {actionID: actionID, userID: userID, allCorrect: allCorrect});
-            console.log('Action Triggered: ', actionID, userID, allCorrect);
+            console.log('Action to be triggered from Quiz: ', actionID, userID, allCorrect);
+            this.hooks.trigger('jeffworld.actions.play', { actionID: actionID, userID: userID, allCorrect: allCorrect });
+
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
@@ -100,7 +101,8 @@ class QuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        let actionId = this.getField('action-id');
+        let actionId = await this.getField('action-id') || "default"; // Retrieve the action ID
+        console.log('Quiz Component Action ID: ', actionId);
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -205,7 +207,9 @@ class SingleQuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        let actionId = this.getField('action-id');
+        let actionId = await this.getField('action-id');
+        console.log('Quiz Component Action ID: ', actionId);
+
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
