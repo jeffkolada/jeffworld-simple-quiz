@@ -76,8 +76,10 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             this.user.sendAnalytics(analyticsKey, result);
             console.log('Analytics Event Sent: ', analyticsKey, result);
             console.log('Action to be triggered from Quiz: ', actionID, userID, allCorrect);
-            this.hooks.trigger('jeffworld.actions.play', { actionID: actionID, userID: userID, allCorrect: allCorrect });
 
+            if (allCorrect === true){
+            this.hooks.trigger('jeffworld.actions.play', { actionID: actionID, userID: userID, allCorrect: allCorrect });
+        }
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
