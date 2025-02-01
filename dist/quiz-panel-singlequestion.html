@@ -156,6 +156,7 @@
     </div>
   </div>
   <script>
+    console.log('Single Quiz Panel loaded');
     let analyticsKey = 'null';
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
@@ -168,7 +169,7 @@
     let quizResult = 0; // Initialize the quiz result
     let currentQuestion = 0; // Initialize the current question index
     let limitResponse; // Initialize the limit response
-    this.actionID = 'null'; // Initialize the action ID
+    let actionID; // Initialize the action ID
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -181,7 +182,7 @@
         endMessageLose = event.data.endMessageLose || endMessageLose; // Update the end message
         randomQuestion = event.data.randomQuestion || randomQuestion; // Update the random question flag
         limitResponse = event.data.limitResponse || limitResponse; // Update the limit response
-        this.actionID = event.data.actionID; // Update the action ID
+        actionID = event.data.actionID; // Update the action ID
 
         // Select a random question if the flag is true
         if (randomQuestion && questions.length > 0) {
@@ -193,7 +194,8 @@
         const quizTitleElement = document.getElementById('quiz-title');
         if (quizTitleElement) {
           quizTitleElement.textContent = event.data.quizTitle || 'Pop Quiz';
-        }
+        };
+        console.log('Single Quiz Panel received update-quiz message:', event.data);
         showQuestion(); // Refresh the displayed question
       }
     });
@@ -243,9 +245,8 @@
       timerBar.style.width = '100%';                                                    // Set the width to 100% to trigger the transition
 
       clearTimeout(timerInterval);                                                      // Clear any existing timeout
-
       timerInterval = setTimeout(() => {
-        moveToNextQuestion();                                                           // Move to the next question if the timer runs out
+        checkAnswer(null);                                                         // Move to the next question if the timer runs out
       }, timerDuration * 1000);                                                         // Wait for the duration of the timer
     }
 
@@ -259,6 +260,42 @@
       timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
+    function checkAnswer(selected) {
+      stopTimer(); // Stop the timer when an answer is checked
+      const choices = document.querySelectorAll(".choice");
+      choices.forEach(choice => choice.style.pointerEvents = 'none'); // Disable further clicks
+
+      // Highlight the correct answer
+      choices[selectedQuestion.correct].classList.add('correct-answer');
+
+      let quizResult = 0;
+
+      if (selected === null) {
+        // Timer ran out. Mark as incorrect
+        quizResult = 0;
+        // Optionally highlight the correct answer
+        choices[selectedQuestion.correct].classList.add('correct-answer');
+      }
+      else if (selected === selectedQuestion.correct) {
+        quizResult = 1; // Correct answer
+        choices[selectedQuestion.correct].classList.add('correct-answer');
+      } else {
+        choices[selectedQuestion.correct].classList.add('correct-answer');
+        choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
+        quizResult = 0; // Incorrect answer
+      }
+
+      // Send the analytics event
+      sendAnalytics(quizResult);
+      showFeedback(quizResult);
+    }
+
+    // Function to display feedback
+    function showFeedback(isCorrect) {
+      const feedback = document.getElementById("feedback");
+      feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
+    }
+
     // Function to send analytics
     function sendAnalytics(quizResult) {
       const allCorrect = quizResult === 1;
@@ -268,42 +305,8 @@
           analytics: analyticsKey,
           allCorrect: allCorrect,
           limitResponse: limitResponse,
-          actionID: this.actionID,
+          actionID: actionID,
         }, '*');
-    }
-
-    function checkAnswer(selected) {
-      stopTimer(); // Stop the timer when an answer is checked
-
-      const choices = document.querySelectorAll(".choice");
-
-      // Disable hover effect on all choices
-      choices.forEach(choice => choice.style.pointerEvents = 'none');
-
-      // Highlight the correct answer
-      choices[selectedQuestion.correct].classList.add('correct-answer');
-
-      let quizResult;
-      if (selected === selectedQuestion.correct) {
-        quizResult = 1; // Correct answer
-      } else {
-        choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
-        quizResult = 0; // Incorrect answer
-      }
-
-      // Send the analytics event
-      sendAnalytics(quizResult);
-
-      // Check if this is the last question
-      const isLastQuestion = currentQuestion >= questions.length - 1;
-
-      showFeedback(selected === selectedQuestion.correct, isLastQuestion);
-    }
-
-    // Function to display feedback
-    function showFeedback(isCorrect) {
-      const feedback = document.getElementById("feedback");
-      feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
     }
 
     // Initialize the quiz with a placeholder message

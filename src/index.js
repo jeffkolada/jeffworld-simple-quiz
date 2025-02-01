@@ -70,15 +70,15 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
             let limitResponse = await msg.limitResponse;
-            let actionID = await msg.actionID;
+            let quizActionID = await msg.actionID;
             let userID = await this.user.getID();
 
             this.user.sendAnalytics(analyticsKey, result);
             console.log('Analytics Event Sent: ', analyticsKey, result);
-            console.log('Action to be triggered from Quiz: ', actionID, userID, allCorrect);
+            console.log('Action to be triggered from Quiz: ', quizActionID, userID, allCorrect);
 
             if (allCorrect === true){
-            this.hooks.trigger('jeffworld.actions.play', { actionID: actionID, userID: userID, allCorrect: allCorrect });
+            this.hooks.trigger('jeffworld.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
         }
 
             // Mark the quiz as completed
@@ -91,10 +91,12 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
 }
 
-/**
- * Component that creates a Multiple Question multiple-choice quiz.
- */
+
 class QuizComponent extends BaseComponent {
+
+    async onObjectUpdated() {
+        this.actionID = this.getField('action-id') || "none";
+    }
 
     /** Called when the component is clicked */
     async onClick() {
@@ -103,8 +105,8 @@ class QuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        let actionId = await this.getField('action-id') || "none"; // Retrieve the action ID
-        console.log('Quiz Component Action ID: ', actionId);
+        this.actionId = this.getField('action-id') || "none"; // Retrieve the action ID
+        console.log('Multiple Quiz Component Action ID: ', this.actionId);
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -134,8 +136,7 @@ class QuizComponent extends BaseComponent {
             const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
             const endMessageLose = this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
-            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
-            console.log('Panel Opened');                                                                  // Console Log ()
+            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration                                                               // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
@@ -154,7 +155,7 @@ class QuizComponent extends BaseComponent {
                     },
                 }
             });
-    
+
         // Send the quiz data to the panel
             setTimeout(() => {
                 this.plugin.menus.postMessage({
@@ -168,7 +169,7 @@ class QuizComponent extends BaseComponent {
                     timerOn: timerOn, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
                     popupID: popupId,
-                    actionID: actionId
+                    actionID: this.actionId,
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
@@ -197,10 +198,12 @@ class QuizComponent extends BaseComponent {
     
 }
 
-/**
- * Component that creates a Multiple Question multiple-choice quiz.
- */
+
 class SingleQuizComponent extends BaseComponent {
+
+    async onObjectUpdated() {
+        this.actionID = await this.getField('action-id') || "none";
+    }
 
     /** Called when the component is clicked */
     async onClick() {
@@ -209,8 +212,8 @@ class SingleQuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        let actionId = await this.getField('action-id') || "none";
-        console.log('Quiz Component Action ID: ', actionId);
+        this.actionId = this.getField('action-id') || "none";
+//        console.log('Quiz Component Action ID: ', this.actionId);
 
 
         // If property is undefined, set it to false and retry
@@ -275,7 +278,7 @@ class SingleQuizComponent extends BaseComponent {
                     timerOn: timerOn, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
                     popupID: popupId,
-                    actionID: actionId
+                    actionID: this.actionId
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
