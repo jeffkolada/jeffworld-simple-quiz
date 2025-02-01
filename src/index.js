@@ -19,7 +19,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },  
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' },
-                { id: 'action-id', name: 'Action ID', type: 'text', help: 'The action ID that will be triggered when the quiz is completed.', default: "default" },
+                { id: 'action-id', name: 'Action ID', type: 'text', help: 'The action ID that will be triggered when the quiz is completed.', default: 'none' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10}, 
@@ -44,7 +44,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },  
                 { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
                 { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
-                { id: 'action-id', name: 'Action ID', type: 'text', help: 'The action ID that will be triggered when the quiz is completed.', default: "default" },
+                { id: 'action-id', name: 'Action ID', type: 'text', help: 'The action ID that will be triggered when the quiz is completed.', default: 'none' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
@@ -103,7 +103,7 @@ class QuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        let actionId = await this.getField('action-id') || "default"; // Retrieve the action ID
+        let actionId = await this.getField('action-id') || "none"; // Retrieve the action ID
         console.log('Quiz Component Action ID: ', actionId);
 
         // If property is undefined, set it to false and retry
@@ -209,7 +209,7 @@ class SingleQuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        let actionId = await this.getField('action-id');
+        let actionId = await this.getField('action-id') || "none";
         console.log('Quiz Component Action ID: ', actionId);
 
 
