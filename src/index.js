@@ -79,7 +79,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
             if (allCorrect === true){
             this.hooks.trigger('jeffworld.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
-        }
+            }
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
@@ -94,27 +94,43 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
 class QuizComponent extends BaseComponent {
 
+    async fetchFields() {
+        this.fieldsCache = {
+            limitResponse: await this.getField('limitResponse'),  // Retrieve the limitResponse setting
+            quizTakenName: 'quiz' + this.getField('analyticsKey'), 
+            properties: await this.plugin.user.getProperty('', quizTakenName),
+            gameOverModal: await this.getField('gameOverModal'),
+            actionId: await this.getField('action-id') || "none", // Retrieve the action ID
+            questionsJson: this.getField('questions');
+            questions: JSON.parse(questionsJson); // Parse JSON string to array of questions
+            quizTitle: this.getField('quizTitle'); // Retrieve the quiz title
+            endMessageWin: this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
+            endMessageLose: this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
+            timerOn: this.getField('timerOn'); // Retrieve the timer status
+            timerDuration: this.getField('timerDuration'); // Retrieve the timer duration   
+        };
+    }
+
     async onObjectUpdated() {
         this.actionID = this.getField('action-id') || "none";
+    
     }
 
     /** Called when the component is clicked */
     async onClick() {
         // Check if the user has already completed the quiz
-        let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
-        let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
-        let properties = await this.plugin.user.getProperty('', quizTakenName);
+        let properties = await this.plugin.user.getProperty('', this.fieldsCache.quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
-        this.actionId = this.getField('action-id') || "none"; // Retrieve the action ID
+
         console.log('Multiple Quiz Component Action ID: ', this.actionId);
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
-            await this.plugin.user.setProperties({ [quizTakenName]: false });
-            properties = await this.plugin.user.getProperty('', quizTakenName);
+            await this.plugin.user.setProperties({ [this.fieldsCache.quizTakenName]: false });
+            properties = await this.plugin.user.getProperty('', this.fieldsCache.quizTakenName);
         }
 
-        if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
+        if ((this.fieldsCache.limitResponse === 'Any Finish' || this.fieldsCache.limitResponse === 'All Correct') && properties === true) {
             console.log('User has already completed the quiz');
             this.plugin.menus.toast({
                 text: gameOverModal || 'You have already taken this quiz.',
@@ -128,7 +144,6 @@ class QuizComponent extends BaseComponent {
             return;
         }
 
-        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
         try {
             const questionsJson = this.getField('questions');
             const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
