@@ -249,6 +249,17 @@
       }, timerDuration * 1000);                                                         // Wait for the duration of the timer
     }
 
+    function moveToNextQuestion() {
+      // Mark the question as incorrect
+      const quizResult = 0;
+
+      // Send analytics event
+      sendAnalytics(quizResult);
+
+      // Show feedback for incorrect answer
+      showFeedback(false);
+    }
+
     // Function to stop the countdown timer
     function stopTimer() {
       clearTimeout(timerInterval);                                                      // Clear the timer
