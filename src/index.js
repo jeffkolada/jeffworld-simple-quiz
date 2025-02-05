@@ -72,18 +72,23 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             let limitResponse = await msg.limitResponse;
             let quizActionID = await msg.actionID;
             let userID = await this.user.getID();
+            let popupID = await msg.popupID;
 
             this.user.sendAnalytics(analyticsKey, result);
 
             if (allCorrect === true){
                 this.hooks.trigger('jeffworld.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
-                }
+                };
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
             if (limitResponse === 'Any Finish' || (limitResponse === 'All Correct' && allCorrect)) {
-                await this.user.setProperties({ [quizTakenName]: true });
-            }
+                await this.user.setProperties({ [quizTakenName]: true })
+            };
+            console.log('Quiz Completed:', quizTakenName, "Closing Popup:", popupID);
+            setTimeout(() => {
+                this.menus.closePopup(popupID);
+              }, 2000);
         }
     }
 

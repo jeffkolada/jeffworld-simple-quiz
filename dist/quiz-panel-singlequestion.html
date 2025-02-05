@@ -157,6 +157,7 @@
   </div>
   <script>
     let analyticsKey = 'null';
+    let popupID = 'null'; 
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
     let endMessageWin = 'Congratulations! You answered correctly!';
@@ -175,6 +176,7 @@
       if (event.data.action === 'update-quiz') {
         questions = event.data.content || []; // Use provided questions
         analyticsKey = event.data.analytics || analyticsKey; // Update the analytics key
+        popupID = event.data.popupID; // Update the popup ID
         timerOn = event.data.timerOn || timerOn; // Update the timer status
         timerDuration = event.data.timerDuration || timerDuration; // Update the timer duration
         endMessageWin = event.data.endMessageWin || endMessageWin; // Update the end message
@@ -245,19 +247,8 @@
       clearTimeout(timerInterval);                                                      // Clear any existing timeout
 
       timerInterval = setTimeout(() => {
-        moveToNextQuestion();                                                           // Move to the next question if the timer runs out
+        checkAnswer();                                                           // Move to the next question if the timer runs out
       }, timerDuration * 1000);                                                         // Wait for the duration of the timer
-    }
-
-    function moveToNextQuestion() {
-      // Mark the question as incorrect
-      const quizResult = 0;
-
-      // Send analytics event
-      sendAnalytics(quizResult);
-
-      // Show feedback for incorrect answer
-      showFeedback(false);
     }
 
     // Function to stop the countdown timer
@@ -280,6 +271,7 @@
           allCorrect: allCorrect,
           limitResponse: limitResponse,
           actionID: actionID,
+          popupID: popupID,
         }, '*');
     }
 
@@ -295,20 +287,25 @@
       choices[selectedQuestion.correct].classList.add('correct-answer');
 
       let quizResult;
+      let allCorrect;
       if (selected === selectedQuestion.correct) {
         quizResult = 1; // Correct answer
+        allCorrect = true;
       } else {
-        choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
-        quizResult = 0; // Incorrect answer
+        if (selected !== undefined){
+          choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
+        }; // Incorrect answer
+        quizResult = 0;
+        allCorrect = false;
       }
+
+      // Check if this is the last question
+//      const isLastQuestion = currentQuestion >= questions.length - 1;
 
       // Send the analytics event
       sendAnalytics(quizResult);
 
-      // Check if this is the last question
-      const isLastQuestion = currentQuestion >= questions.length - 1;
-
-      showFeedback(selected === selectedQuestion.correct, isLastQuestion);
+      showFeedback(allCorrect); // Display feedback message
     }
 
     // Function to display feedback
@@ -317,9 +314,9 @@
       feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
     }
 
-    // Initialize the quiz with a placeholder message
+/*     // Initialize the quiz with a placeholder message
     document.getElementById('quiz-title').textContent = ' ';
-    document.getElementById("question-text").textContent = "  ";
+    document.getElementById("question-text").textContent = "  "; */
   </script>
 </body>
 

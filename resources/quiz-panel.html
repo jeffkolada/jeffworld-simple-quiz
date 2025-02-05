@@ -166,12 +166,14 @@
     let endMessageWin = 'Congratulations! You answered all questions correctly!';
     let endMessageLose = 'Keep practicing to improve your score.';
     let limitResponse = 'None'; // Initialize limitResponse to None
+    let popupID = 'null'; 
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
         questions = event.data.content; // Directly use the passed object
         analyticsKey = event.data.analytics; // Update the analytics key
+        popupID = event.data.popupID; // Update the popup ID
         limitResponse = event.data.limitResponse; // Update the limit response status
         timerOn = event.data.timerOn || false; // Update the timer status
         timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
@@ -277,6 +279,7 @@
       const allCorrect = correctAnswers === questions.length; // Calculate allCorrect
       parent.postMessage({ 
           action: 'send-results', 
+          popupID: popupID,
           result: correctAnswers,
           analytics: analyticsKey,
           allCorrect: allCorrect,
@@ -319,7 +322,7 @@
           choice.style.pointerEvents = '';
         });
         moveToNextQuestion();
-      }, 3000);
+      }, 1500);
 }
     // Initialize the quiz with a placeholder message
     document.getElementById('quiz-title').textContent = ' ';
