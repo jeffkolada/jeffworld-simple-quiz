@@ -94,6 +94,11 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
 class QuizComponent extends BaseComponent {
 
+    async onObjectUpdated() {
+        await this.fetchFields();
+        console.log("Fields have been re-fetched:", this.fieldsCache)
+    }
+
     async fetchFields() {
         this.fieldsCache = {
             limitResponse: await this.getField('limitResponse'),  // Retrieve the limitResponse setting
@@ -101,19 +106,14 @@ class QuizComponent extends BaseComponent {
             properties: await this.plugin.user.getProperty('', quizTakenName),
             gameOverModal: await this.getField('gameOverModal'),
             actionId: await this.getField('action-id') || "none", // Retrieve the action ID
-            questionsJson: this.getField('questions');
-            questions: JSON.parse(questionsJson); // Parse JSON string to array of questions
-            quizTitle: this.getField('quizTitle'); // Retrieve the quiz title
-            endMessageWin: this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
-            endMessageLose: this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
-            timerOn: this.getField('timerOn'); // Retrieve the timer status
-            timerDuration: this.getField('timerDuration'); // Retrieve the timer duration   
+            questionsJson: this.getField('questions'),
+            questions: JSON.parse(questionsJson), // Parse JSON string to array of questions
+            quizTitle: this.getField('quizTitle'), // Retrieve the quiz title
+            endMessageWin: this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!', // Default win message
+            endMessageLose: this.getField('endMessageLose') || 'Keep practicing to improve your score.', // Default lose message
+            timerOn: this.getField('timerOn'), // Retrieve the timer status
+            timerDuration: this.getField('timerDuration'), // Retrieve the timer duration   
         };
-    }
-
-    async onObjectUpdated() {
-        this.actionID = this.getField('action-id') || "none";
-    
     }
 
     /** Called when the component is clicked */
