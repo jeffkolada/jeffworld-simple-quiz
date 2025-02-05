@@ -19,15 +19,15 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },  
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' },
-            { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
+            { id: 'section-end-message', name: 'Quiz Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
                 { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
-            { id: 'section-analytics', name: 'Analytics & Action Setup', type: 'section', },
+            { id: 'section-analytics', name: 'Quiz Analytics & Action Setup', type: 'section', },
                 { id: 'action-id', name: 'Trigger Action ID', type: 'text', help: 'Unique identifier for the action.', default: 'none' },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
                 { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
-            { id: 'section-timer', name: 'Timer Settings', type: 'section' },
+            { id: 'section-timer', name: 'Quiz Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false},
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10}, 
                 { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
@@ -44,15 +44,15 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },  
                 { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON string representing quiz question and choices. By default the single question quiz will use the first question provided.' },
                 { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
-            { id: 'section-end-message', name: 'Game Over Messages', type: 'section' },
+            { id: 'section-end-message', name: 'Quiz Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
                 { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
-            { id: 'section-analytics', name: 'Analytics & Action Setup', type: 'section', },
+            { id: 'section-analytics', name: 'Quiz Analytics & Action Setup', type: 'section', },
                 { id: 'action-id', name: 'Trigger Action ID', type: 'text', help: 'Trigger an action based on a unique ID.', default: 'none' },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
                 { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
-            { id: 'section-timer', name: 'Timer Settings', type: 'section' },
+            { id: 'section-timer', name: 'Quiz Timer Settings', type: 'section' },
                 { id: 'timerOn', name: 'Timer Enabled', type: 'checkbox', help: 'Enable or Disable the Timer feature.', default: false },
                 { id: 'timerDuration', name: 'Timer Duration', type: 'number', help: 'Time in seconds for each question.', default: 10 }, 
             { id: 'section-helpguide', name: 'Quiz Creator Help Guide', type: 'section' },
@@ -301,6 +301,5 @@ class SingleQuizComponent extends BaseComponent {
         });
         }
     }
-    
 }
 
