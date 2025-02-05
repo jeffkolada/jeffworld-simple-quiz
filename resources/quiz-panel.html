@@ -159,14 +159,13 @@
     </div>
   </div>
   <script>
-    console.log('Quiz Panel loaded');
     let analyticsKey = 'null';
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
     let endMessageWin = 'Congratulations! You answered all questions correctly!';
     let endMessageLose = 'Keep practicing to improve your score.';
     let limitResponse = 'None'; // Initialize limitResponse to None
-    let actionID;
+    this.actionID = 'null';
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -183,13 +182,10 @@
         const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
           quizTitleElement.textContent = event.data.quizTitle || 'Multiple Choice Quiz';
-        };
-        console.log('Multiple Quiz Panel received update-quiz message:', event.data);
+        }
         showQuestion(); // Refresh the displayed question
       }
     });
-
-
 
     // Variables to track the state of the quiz
     let currentQuestion = 0;
@@ -281,18 +277,17 @@
       const allCorrect = correctAnswers === questions.length; // Calculate allCorrect
       parent.postMessage({ 
           action: 'send-results', 
-          actionID: actionID,
           result: correctAnswers,
           analytics: analyticsKey,
           allCorrect: allCorrect,
           limitResponse: limitResponse,
-          }, '*');
-      }
-    
+          actionID: this.actionID }, '*');
+    }
 
     // Function to check answers
     function checkAnswer(selected) {
       stopTimer(); // Stop the timer when an answer is checked
+
       const choices = document.querySelectorAll(".choice");
 
       // Disable hover effect on all choices by removing the hover style

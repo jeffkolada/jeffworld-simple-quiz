@@ -70,16 +70,21 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
             let limitResponse = await msg.limitResponse;
-            let quizActionID = await msg.actionID;
+            let actionID = await msg.actionID;
             let userID = await this.user.getID();
 
             this.user.sendAnalytics(analyticsKey, result);
             console.log('Analytics Event Sent: ', analyticsKey, result);
-            console.log('Action to be triggered from Quiz: ', quizActionID, userID, allCorrect);
+            console.log('Action to be triggered from Quiz: ', actionID, userID, allCorrect);
 
             if (allCorrect === true){
+<<<<<<< HEAD
             this.hooks.trigger('jeffworld.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
             }
+=======
+            this.hooks.trigger('jeffworld.actions.play', { actionID: actionID, userID: userID, allCorrect: allCorrect });
+        }
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
@@ -91,9 +96,12 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
 }
 
-
+/**
+ * Component that creates a Multiple Question multiple-choice quiz.
+ */
 class QuizComponent extends BaseComponent {
 
+<<<<<<< HEAD
     async onObjectUpdated() {
         await this.fetchFields();
         console.log("Fields have been re-fetched:", this.fieldsCache)
@@ -116,13 +124,20 @@ class QuizComponent extends BaseComponent {
         };
     }
 
+=======
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
     /** Called when the component is clicked */
     async onClick() {
         // Check if the user has already completed the quiz
         let properties = await this.plugin.user.getProperty('', this.fieldsCache.quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
+<<<<<<< HEAD
 
         console.log('Multiple Quiz Component Action ID: ', this.actionId);
+=======
+        let actionId = await this.getField('action-id') || "none"; // Retrieve the action ID
+        console.log('Quiz Component Action ID: ', actionId);
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -145,7 +160,18 @@ class QuizComponent extends BaseComponent {
         }
 
         try {
+<<<<<<< HEAD
             await this.fetchFields();                                                           // Console Log ()
+=======
+            const questionsJson = this.getField('questions');
+            const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
+            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
+            const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
+            const endMessageLose = this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
+            const timerOn = this.getField('timerOn'); // Retrieve the timer status
+            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+            console.log('Panel Opened');                                                                  // Console Log ()
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
             
             this.isPopupOpen = true; // Set the flag to true
 
@@ -164,7 +190,7 @@ class QuizComponent extends BaseComponent {
                     },
                 }
             });
-
+    
         // Send the quiz data to the panel
             setTimeout(() => {
                 this.plugin.menus.postMessage({
@@ -178,7 +204,11 @@ class QuizComponent extends BaseComponent {
                     timerOn: this.fieldsCache.timerOn, // Include the timer status in the message
                     timerDuration: this.fieldsCache.timerDuration, // Include the timer duration in the message
                     popupID: popupId,
+<<<<<<< HEAD
                     actionID: this.fieldsCache.actionId,
+=======
+                    actionID: actionId
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
@@ -207,9 +237,12 @@ class QuizComponent extends BaseComponent {
     
 }
 
-
+/**
+ * Component that creates a Multiple Question multiple-choice quiz.
+ */
 class SingleQuizComponent extends BaseComponent {
 
+<<<<<<< HEAD
     async onObjectUpdated() {
         await this.fetchFields();
         console.log("Fields have been re-fetched:", this.fieldsCache)
@@ -235,6 +268,18 @@ class SingleQuizComponent extends BaseComponent {
     /** Called when the component is clicked */
     async onClick() {
         this.fetchFields();
+=======
+    /** Called when the component is clicked */
+    async onClick() {
+        // Check if the user has already completed the quiz
+        let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
+        let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
+        let properties = await this.plugin.user.getProperty('', quizTakenName);
+        let gameOverModal = this.getField('gameOverModal');
+        let actionId = await this.getField('action-id') || "none";
+        console.log('Quiz Component Action ID: ', actionId);
+
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
 
         // If property is undefined, set it to false and retry
         if (this.fieldsCache.properties === undefined) {
@@ -288,7 +333,11 @@ class SingleQuizComponent extends BaseComponent {
                     timerOn: this.fieldsCache.timerOn, // Include the timer status in the message
                     timerDuration: this.fieldsCache.timerDuration, // Include the timer duration in the message
                     popupID: popupId,
+<<<<<<< HEAD
                     actionID: this.fieldsCache.actionId
+=======
+                    actionID: actionId
+>>>>>>> parent of 98a5851 (actionIDs on both quiz types)
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
