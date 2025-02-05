@@ -65,7 +65,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
         if (msg.action == 'send-results') {
-            console.log('Message received in Quiz plugin: ', msg);
+//            console.log('Message received in Quiz plugin: ', msg);
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
@@ -85,7 +85,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             if (limitResponse === 'Any Finish' || (limitResponse === 'All Correct' && allCorrect)) {
                 await this.user.setProperties({ [quizTakenName]: true })
             };
-            console.log('Quiz Completed:', quizTakenName, "Closing Popup:", popupID);
+//            console.log('Quiz Completed:', quizTakenName, "Closing Popup:", popupID);
             setTimeout(() => {
                 this.menus.closePopup(popupID);
               }, 2000);
@@ -114,7 +114,7 @@ class QuizComponent extends BaseComponent {
         }
 
         if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
-            console.log('User has already completed the quiz');
+//            console.log('User has already completed the quiz');
             this.plugin.menus.toast({
                 text: gameOverModal || 'You have already taken this quiz.',
                 duration: 3000
@@ -123,7 +123,7 @@ class QuizComponent extends BaseComponent {
         }
 
         if (this.isPopupOpen) {
-            console.log('Popup is already open'); // Prevent opening another popup
+//            console.log('Popup is already open'); // Prevent opening another popup
             return;
         }
 
@@ -137,12 +137,12 @@ class QuizComponent extends BaseComponent {
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             const actionID = this.getField('action-id'); // Retrieve the action ID
-            console.log('Panel Opened');                                                                  // Console Log ()
+//            console.log('Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
             let propertyTaken = await this.plugin.user.getProperty('', 'quiz' + analyticsKey);
-            console.log('Property Taken:', propertyTaken);
+//            console.log('Property Taken:', propertyTaken);
 
             const popupId = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
@@ -151,7 +151,7 @@ class QuizComponent extends BaseComponent {
                     width: 600,
                     height: 650,
                     onClose: () => {
-                        console.log("Popup closed");
+//                        console.log("Popup closed");
                         this.isPopupOpen = false; // Reset the flag when the popup is closed
                     },
                 }
@@ -182,7 +182,7 @@ class QuizComponent extends BaseComponent {
         
     async onAction(id) {
         if (id == 'helpGuide') {
-        console.log('Open the Help Guide');
+//        console.log('Open the Help Guide');
         await this.plugin.menus.displayPopup({
             title: 'Quiz Creator Help Guide',
             panel: {
@@ -190,7 +190,7 @@ class QuizComponent extends BaseComponent {
                 width: 720,
                 height: 640,
                 onClose: () => {
-                    console.log("Help Guide closed");
+//                    console.log("Help Guide closed");
                 },
             }
         });
@@ -219,7 +219,7 @@ class SingleQuizComponent extends BaseComponent {
         }
 
         if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
-            console.log('User has already completed the quiz');
+//            console.log('User has already completed the quiz');
             this.plugin.menus.toast({
                 text: gameOverModal || 'You have already taken this quiz.',
                 duration: 3000
@@ -228,7 +228,7 @@ class SingleQuizComponent extends BaseComponent {
         }
 
         if (this.isPopupOpen) {
-            console.log('Popup is already open'); // Prevent opening another popup
+//            console.log('Popup is already open'); // Prevent opening another popup
             return;
         }
 
@@ -244,7 +244,7 @@ class SingleQuizComponent extends BaseComponent {
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
             const actionID = this.getField('action-id'); // Retrieve the action ID
-            console.log('Quiz Panel Opened');                                                                  // Console Log ()
+//            console.log('Quiz Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
@@ -255,7 +255,7 @@ class SingleQuizComponent extends BaseComponent {
                     width: 600,
                     height: 650,
                     onClose: () => {
-                        console.log("Popup closed");
+//                        console.log("Popup closed");
                         this.isPopupOpen = false; // Reset the flag when the popup is closed
                     },
                 }
@@ -287,7 +287,7 @@ class SingleQuizComponent extends BaseComponent {
         
     async onAction(id) {
         if (id == 'helpGuide') {
-        console.log('Open the Help Guide');
+//        console.log('Open the Help Guide');
         this.plugin.menus.displayPopup({
             title: 'Quiz Creator Help Guide',
             panel: {
@@ -295,7 +295,7 @@ class SingleQuizComponent extends BaseComponent {
                 width: 720,
                 height: 640,
                 onClose: () => {
-                    console.log("Help Guide closed");
+//                    console.log("Help Guide closed");
                 },
             }
         });
