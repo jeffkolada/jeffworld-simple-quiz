@@ -23,7 +23,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Keep practicing to improve your score.' },
                 { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
-                { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+            { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+                { id: 'action-id', name: 'Action ID', type: 'text', help: 'Unique identifier for the action.', default: 'none' },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
                 { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
@@ -48,6 +49,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'endMessageLose', name: 'Game Over Lose', type: 'textarea', help: 'Message to display at the end when user gets any answers wrong.', default: 'Try again next time.' },
                 { id: 'gameOverModal', name: 'Quiz Aready Taken', type: 'textarea', help: 'If the quiz cannot be retaken, this message appears once completed.', default: 'You have already taken this quiz.' },
             { id: 'section-analytics', name: 'Analytics Setup', type: 'section', },
+                { id: 'action-id', name: 'Action ID', type: 'text', help: 'Unique identifier for the action.', default: 'none' },
                 { id: 'analyticsKey', name: 'Analytics Name', type: 'text', help: 'Name for the analytics event. The value sent will be equal to the number of correct answers.' },
                 { id: 'limitResponse', name: 'Limit Replay After:', type: 'select', values: ['None', 'Any Finish', 'All Correct'], help: 'When an option is selected, the quiz cannot be re-taken after the finishing the quiz or after answering all correctly. "Quiz Taken" state is tracked by Analytics Name.', default: 'None' },
             { id: 'section-timer', name: 'Timer Settings', type: 'section' },
@@ -63,11 +65,19 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
         if (msg.action == 'send-results') {
+            console.log('Message received in Quiz plugin: ', msg);
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
             let limitResponse = await msg.limitResponse;
+            let quizActionID = await msg.actionID;
+            let userID = await this.user.getID();
+
             this.user.sendAnalytics(analyticsKey, result);
+
+            if (allCorrect === true){
+                this.hooks.trigger('jeffworld.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
+                }
 
             // Mark the quiz as completed
             let quizTakenName = 'quiz' + analyticsKey;
@@ -121,6 +131,7 @@ class QuizComponent extends BaseComponent {
             const endMessageLose = this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
+            const actionID = this.getField('action-id'); // Retrieve the action ID
             console.log('Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
@@ -153,7 +164,8 @@ class QuizComponent extends BaseComponent {
                     endMessageLose: endMessageLose, // Include the lose message in the message
                     timerOn: timerOn, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
-                    popupID: popupId
+                    popupID: popupId,
+                    actionID: actionID
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
@@ -226,6 +238,7 @@ class SingleQuizComponent extends BaseComponent {
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
+            const actionID = this.getField('action-id'); // Retrieve the action ID
             console.log('Quiz Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
@@ -256,7 +269,8 @@ class SingleQuizComponent extends BaseComponent {
                     endMessageLose: endMessageLose, // Include the lose message in the message
                     timerOn: timerOn, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
-                    popupID: popupId
+                    popupID: popupId,
+                    actionID: actionID
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     

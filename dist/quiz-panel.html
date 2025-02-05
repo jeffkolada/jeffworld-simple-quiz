@@ -160,6 +160,7 @@
   </div>
   <script>
     let analyticsKey = 'null';
+    let actionID = 'null';
     let timerOn = false; // Initialize timerOn to false
     let timerDuration = 10; // Default timer duration if not provided
     let endMessageWin = 'Congratulations! You answered all questions correctly!';
@@ -176,6 +177,7 @@
         timerDuration = event.data.timerDuration || 10; // Update the timer duration, default to 10 seconds if not provided
         endMessageWin = event.data.endMessageWin; // Update the end message
         endMessageLose = event.data.endMessageLose; // Update the end message
+        actionID = event.data.actionID; // Update the action ID
 
         const quizTitleElement = document.getElementById('quiz-title'); // Update the quiz title
         if (quizTitleElement) {
@@ -278,7 +280,9 @@
           result: correctAnswers,
           analytics: analyticsKey,
           allCorrect: allCorrect,
-          limitResponse: limitResponse}, '*');
+          limitResponse: limitResponse,
+          actionID: actionID,
+        }, '*');
     }
 
     // Function to check answers
