@@ -145,13 +145,7 @@ class QuizComponent extends BaseComponent {
         }
 
         try {
-            const questionsJson = this.getField('questions');
-            const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
-            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
-            const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!'; // Default win message
-            const endMessageLose = this.getField('endMessageLose') || 'Keep practicing to improve your score.'; // Default lose message
-            const timerOn = this.getField('timerOn'); // Retrieve the timer status
-            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration                                                               // Console Log ()
+            await this.fetchFields();                                                           // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
@@ -175,16 +169,16 @@ class QuizComponent extends BaseComponent {
             setTimeout(() => {
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
-                    content: questions,  // Send already parsed object
-                    analytics: analyticsKey, // Send analytics key
-                    limitResponse: limitResponse, // Send limit response setting
-                    quizTitle: quizTitle,  // Include the quiz title in the message
-                    endMessageWin: endMessageWin, // Include the win message in the message
-                    endMessageLose: endMessageLose, // Include the lose message in the message
-                    timerOn: timerOn, // Include the timer status in the message
-                    timerDuration: timerDuration, // Include the timer duration in the message
+                    content: this.fieldsCache.questions,  // Send already parsed object
+                    analytics: this.fieldsCache.analyticsKey, // Send analytics key
+                    limitResponse: this.fieldsCache.limitResponse, // Send limit response setting
+                    quizTitle: this.fieldsCache.quizTitle,  // Include the quiz title in the message
+                    endMessageWin: this.fieldsCache.endMessageWin, // Include the win message in the message
+                    endMessageLose: this.fieldsCache.endMessageLose, // Include the lose message in the message
+                    timerOn: this.fieldsCache.timerOn, // Include the timer status in the message
+                    timerDuration: this.fieldsCache.timerDuration, // Include the timer duration in the message
                     popupID: popupId,
-                    actionID: this.actionId,
+                    actionID: this.fieldsCache.actionId,
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
@@ -217,27 +211,38 @@ class QuizComponent extends BaseComponent {
 class SingleQuizComponent extends BaseComponent {
 
     async onObjectUpdated() {
-        this.actionID = await this.getField('action-id') || "none";
+        await this.fetchFields();
+        console.log("Fields have been re-fetched:", this.fieldsCache)
+    }
+
+    async fetchFields() {
+        this.fieldsCache = {
+            limitResponse: await this.getField('limitResponse'),  // Retrieve the limitResponse setting
+            quizTakenName: 'quiz' + this.getField('analyticsKey'), 
+            properties: await this.plugin.user.getProperty('', quizTakenName),
+            gameOverModal: await this.getField('gameOverModal'),
+            actionId: await this.getField('action-id') || "none", // Retrieve the action ID
+            questionsJson: this.getField('questions'),
+            questions: JSON.parse(questionsJson), // Parse JSON string to array of questions
+            quizTitle: this.getField('quizTitle'), // Retrieve the quiz title
+            endMessageWin: this.getField('endMessageWin') || 'Congratulations! You answered all questions correctly!', // Default win message
+            endMessageLose: this.getField('endMessageLose') || 'Keep practicing to improve your score.', // Default lose message
+            timerOn: this.getField('timerOn'), // Retrieve the timer status
+            timerDuration: this.getField('timerDuration'), // Retrieve the timer duration   
+        };
     }
 
     /** Called when the component is clicked */
     async onClick() {
-        // Check if the user has already completed the quiz
-        let limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
-        let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
-        let properties = await this.plugin.user.getProperty('', quizTakenName);
-        let gameOverModal = this.getField('gameOverModal');
-        this.actionId = this.getField('action-id') || "none";
-//        console.log('Quiz Component Action ID: ', this.actionId);
-
+        this.fetchFields();
 
         // If property is undefined, set it to false and retry
-        if (properties === undefined) {
+        if (this.fieldsCache.properties === undefined) {
             await this.plugin.user.setProperties({ [quizTakenName]: false });
-            properties = await this.plugin.user.getProperty('', quizTakenName);
+            this.fieldsCache.properties = await this.plugin.user.getProperty('', quizTakenName);
         }
 
-        if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && properties === true) {
+        if ((limitResponse === 'Any Finish' || limitResponse === 'All Correct') && this.fieldsCache.properties === true) {
             console.log('User has already completed the quiz');
             this.plugin.menus.toast({
                 text: gameOverModal || 'You have already taken this quiz.',
@@ -251,17 +256,7 @@ class SingleQuizComponent extends BaseComponent {
             return;
         }
 
-        let analyticsKey = this.getField('analyticsKey'); // Retrieve the analytics key
         try {
-            const questionsJson = this.getField('questions');
-            const questions = JSON.parse(questionsJson); // Parse JSON string to array of questions
-            const randomQuestion = this.getField('question-random'); // Retrieve the random question status
-            const quizTitle = this.getField('quizTitle'); // Retrieve the quiz title
-            const endMessageWin = this.getField('endMessageWin') || 'Congratulations! You answered correctly!'; // Default win message
-            const endMessageLose = this.getField('endMessageLose') || 'Try again next time'; // Default lose message
-            const timerOn = this.getField('timerOn'); // Retrieve the timer status
-            const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
-            const limitResponse = this.getField('limitResponse');  // Retrieve the limitResponse setting
             console.log('Quiz Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
@@ -283,17 +278,17 @@ class SingleQuizComponent extends BaseComponent {
             setTimeout(() => {
                 this.plugin.menus.postMessage({
                     action: 'update-quiz',
-                    content: questions,  // Send already parsed object
-                    randomQuestion: randomQuestion, // Send random question status
-                    analytics: analyticsKey, // Send analytics key
-                    limitResponse: limitResponse, // Send limit response setting
-                    quizTitle: quizTitle,  // Include the quiz title in the message
-                    endMessageWin: endMessageWin, // Include the win message in the message
-                    endMessageLose: endMessageLose, // Include the lose message in the message
-                    timerOn: timerOn, // Include the timer status in the message
-                    timerDuration: timerDuration, // Include the timer duration in the message
+                    content: this.fieldsCache.questions,  // Send already parsed object
+                    randomQuestion: this.fieldsCache.randomQuestion, // Send random question status
+                    analytics: this.fieldsCache.analyticsKey, // Send analytics key
+                    limitResponse: this.fieldsCache.limitResponse, // Send limit response setting
+                    quizTitle: this.fieldsCache.quizTitle,  // Include the quiz title in the message
+                    endMessageWin: this.fieldsCache.endMessageWin, // Include the win message in the message
+                    endMessageLose: this.fieldsCache.endMessageLose, // Include the lose message in the message
+                    timerOn: this.fieldsCache.timerOn, // Include the timer status in the message
+                    timerDuration: this.fieldsCache.timerDuration, // Include the timer duration in the message
                     popupID: popupId,
-                    actionID: this.actionId
+                    actionID: this.fieldsCache.actionId
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
     
