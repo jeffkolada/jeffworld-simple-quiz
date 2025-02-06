@@ -38,6 +38,8 @@ When choosing the correct answer, start from value 0 for the first answer. In th
     }
 ]
 ```
+## Action ID
+When the quiz is completed successfully, an action can be triggered remotely via ActionID. Use the Action Objects plugin to animate this or a separate object when the quiz has completed.
 
 ## Analytics Value
 
