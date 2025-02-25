@@ -78,6 +78,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
             if (allCorrect === true){
                 this.hooks.trigger('jeffworld.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
+                this.hooks.trigger('vatom.actions.play', { actionID: quizActionID, userID: userID, allCorrect: allCorrect });
                 };
 
             // Mark the quiz as completed
