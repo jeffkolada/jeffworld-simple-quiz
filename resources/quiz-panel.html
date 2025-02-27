@@ -4,144 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <style>
-      @font-face {
-          font-family: 'Outfit';
-          src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-      }
-
-      body {
-          font-family: 'Outfit', sans-serif;
-          background-color: #000000;
-          color: aliceblue;
-          margin: 0;
-          padding: 25px; /* Add padding to the body */
-          box-sizing: border-box; /* Include padding in the body's total width and height */
-          height: 100vh; /* Full viewport height */
-          display: flex;
-          justify-content: center;
-          text-align: center; /* Center align all content */
-      }
-
-      .quiz-container {
-          box-sizing: border-box;
-          width: calc(100% - 50px); /* Adjust width to account for body padding */
-          max-width: 600px;
-          padding: 2em;
-          background-color: #191919;
-          border-radius: 20px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          height: calc(100% - 50px); /* Adjust height to account for body padding */
-          display: flex;
-          flex-direction: column; /* Stack children vertically */
-          justify-content: center; /* Center align all content */
-          align-items: center;
-      }
-
-      .choices {
-          display: flex;
-          flex-direction: column;
-          width: 100%; /* Fill the width of the container */
-          padding: 10px;
-      }
-
-      .choice {
-          font-family: 'Outfit', sans-serif;
-          font-weight: 300;
-          font-size: 1em;
-          margin: 5px 0; /* Margin between buttons */
-          padding: .5em .75em;
-          background-color: #393939;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          width: 400px; /* Set width of the buttons */
-          max-width: 550px; /* Set maximum width */
-          height: 60px; /* Set a fixed height */
-          box-sizing: border-box;
-          transition: background-color 0.2s ease; /* Smooth transition for background color */
-      }
-
-      .choice:hover {
-          background-color: #4a5056;
-      }
-
-      .choice.disable-hover:hover {
-          background-color: #393939; /* Disable hover effect */
-      }
-
-      .correct-answer {
-          background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
-      }
-
-      .incorrect-answer {
-        background-color: rgba(210, 47, 47, 0.567); /* Highlight incorrect answer with red color */
-      }
-
-      .feedback-container {
-          position: relative;
-          width: 400px; /* Fill the width of the container */
-          height: 20px; /* Set a fixed height for the spacer */
-          margin-top: 1px; /* Add some spacing above the feedback */
-          background-color: rgba(255, 255, 255, 0); /* 0% opacity */
-      }
-
-      .feedback-background {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 400px;
-          height: 20px;
-          background-color: rgba(255, 255, 255, 0);
-      }
-
-      .feedback-content {
-          position: relative;
-          z-index: 1; /* Ensure it appears above the background */
-          margin: 0; /* Remove default margin */
-          line-height: 20px; /* Center text vertically */
-          width: 100%; /* Fill the width of the container */
-      }
-
-
-      .quiz-title {
-          text-align: center;
-      }
-
-      .timer-bar-container {
-          position: relative;
-          height: 5px; /* Total height of both bars */
-          width: 100%; /* Fill the width of the container */
-          margin-bottom: 20px; /* Add some space below the timer bar */
-      }
-
-      .timer-bar-background {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 5px;
-          width: 100%;
-          background-color: rgba(255, 255, 255, 0.10);
-          opacity: 100;
-          border-radius: 2px;
-      }
-
-      .timer-bar {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 5px;
-          background-color: rgb(170, 170, 170);
-          width: 0%; /* Initially zero width */
-          border-radius: 2px;
-          transition: width linear;
-      }
-  </style>
+    <link rel="stylesheet" href="style.css">
   
 </head>
 <body>
-  <div class="quiz-container">
     <div class="timer-bar-container" id="timer-bar-container" style="display: none;">
       <div class="timer-bar-background"></div>
       <div class="timer-bar" id="timer-bar"></div>
@@ -157,7 +23,6 @@
         <p id="feedback" class="feedback-content"></p>
       </div>
     </div>
-  </div>
   <script>
     let analyticsKey = 'null';
     let actionID = 'null';
