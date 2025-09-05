@@ -69,7 +69,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-    //  console.log('Message received in Quiz plugin: ', msg);
+      console.log('Message received in Quiz plugin: ', msg);
         if (msg.action == 'send-results') {
 
             // ACTIVITY COMPONENT
@@ -85,7 +85,6 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                     respondingUserId,
                     response        : msg.result
                 }
-
                 this.hooks.trigger('activity-response', payload);
 
                 // Optionally close the popup quickly (to match original behavior)
@@ -196,7 +195,7 @@ class QuizComponent extends BaseComponent {
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     endMessageWin: endMessageWin, // Include the win message in the message
                     endMessageLose: endMessageLose, // Include the lose message in the message
-                    timerOn: timerOn, // Include the timer status in the message
+                    timerOn: true, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
                     popupID: popupId,
                     actionID: actionID
@@ -368,9 +367,9 @@ class SingleQuizActivityComponent extends BaseComponent {
                     title: 'Answer Choices',
                     order: ['A','B','C','D'], // render order
                     properties: {
-                        A: { type: 'string', default: 'Elephant',   placeholder: 'Option A' },
-                        B: { type: 'string', default: 'Blue Whale', placeholder: 'Option B' },
-                        C: { type: 'string', default: 'Giraffe',    placeholder: 'Option C' },
+                        A: { type: 'string', default: '',   placeholder: 'Option A' },
+                        B: { type: 'string', default: '', placeholder: 'Option B' },
+                        C: { type: 'string', default: '',    placeholder: 'Option C (optional)' },
                         D: { type: 'string', default: '',           placeholder: 'Option D (optional)' }
                     }
                     },
@@ -388,38 +387,57 @@ class SingleQuizActivityComponent extends BaseComponent {
     buildQuestionsFromOptions(options = {}) {
         const q = String(options.question || options.title || 'Untitled question');
 
-        // Prefer grouped array (created by the Manager group), fallback to legacy fields
-        let choices = Array.isArray(options.answerChoices) ? options.answerChoices.slice() : null;
-        if (!choices || choices.length === 0) {
-            const raw = [options.optionA, options.optionB, options.optionC, options.optionD]
-            .map(v => (v == null ? '' : String(v).trim()))
-            .filter(v => v.length > 0);
-            choices = raw;
-        }
-        if (!Array.isArray(choices) || choices.length < 2) {
-            choices = ['Option 1', 'Option 2'];
+        // 1) Collect raw choices from preferred/new keys, then legacy keys
+        let base = Array.isArray(options.answers) ? options.answers
+                : Array.isArray(options.answerChoices) ? options.answerChoices
+                : [options.optionA, options.optionB, options.optionC, options.optionD];
+
+        base = Array.isArray(base) ? base : [];
+        // Keep original indices so we can remap the "correct" answer after filtering blanks
+        let entries = base
+            .map((v, i) => ({ text: (v == null ? '' : String(v).trim()), i }))
+            .filter(e => e.text.length > 0);            // <-- drop empty choices
+
+        // 2) Determine the originally selected "correct" index (before filtering)
+        const letterMap = { A:0, B:1, C:2, D:3 };
+        let selectedOriginalIndex = 0;
+        if (typeof options.correct === 'number' && Number.isFinite(options.correct)) {
+            selectedOriginalIndex = options.correct;
+        } else if (options.correctAnswer != null) {   // supports your schema's 'correctAnswer'
+            const k = String(options.correctAnswer).trim().toUpperCase();
+            selectedOriginalIndex = letterMap[k] ?? 0;
+        } else if (options.correctChoice != null) {   // and 'correctChoice' if used elsewhere
+            const k = String(options.correctChoice).trim().toUpperCase();
+            selectedOriginalIndex = letterMap[k] ?? 0;
         }
 
-        const idxMap = { A:0, B:1, C:2, D:3 };
+        // 3) Remap "correct" to the new index after filtering out empties
         let correct = 0;
-        if (typeof options.correct === 'number' && Number.isFinite(options.correct)) {
-            correct = Math.max(0, Math.min(choices.length - 1, options.correct));
-        } else if (options.correctChoice) {
-            const key = String(options.correctChoice).trim().toUpperCase();
-            correct = idxMap[key] ?? 0;
+        const remapped = entries.findIndex(e => e.i === selectedOriginalIndex);
+        correct = remapped >= 0 ? remapped : 0;
+
+        // 4) Ensure at least two choices; pad with sensible defaults if needed
+        if (entries.length < 2) {
+            const defaults = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+            for (let j = 0; entries.length < 2 && j < defaults.length; j++) {
+            entries.push({ text: defaults[j], i: 100 + j });
+            }
+            // If original correct vanished and we padded, keep correct at 0
+            if (correct >= entries.length) correct = 0;
         }
-        if (correct >= choices.length) correct = 0;
+
+        const choices = entries.map(e => e.text);
 
         return [{
             question: q,
-            choices,
-            correct
+            choices,     // no empty strings included
+            correct      // index aligned to filtered choices
         }];
     }
 
-
     // Start handler (arrow fn keeps `this`)
     activityStart = async (payload) => {
+        console.log('[QUIZ ACTIVITY] ActivityStart ', payload);
         // ACTIVITY FILTERS & REQUIRED DATA
         const myID = this.myUserID || await this.plugin.user.getID();
         const byType = payload?.type === 'simplequiz';
@@ -434,11 +452,12 @@ class SingleQuizActivityComponent extends BaseComponent {
 
         // Build the quiz content from Manager options
         const content = this.buildQuestionsFromOptions(options);
+        console.log('[QUIZ ACTIVITY] BuildQuestionsFromOptions Start: ', content);
 
         // Decide timer flags for the panel
         const durationMs   = Math.max(1, Number(options.duration || 6000));
         const timerOn      = true;                 // panel expects a boolean; we turn it on when duration is provided
-        const timerDuration= durationMs;
+        const timerDuration= (durationMs/1000);
 
         // Reasonable fallbacks for other panel-required keys
         const randomQuestion = false;

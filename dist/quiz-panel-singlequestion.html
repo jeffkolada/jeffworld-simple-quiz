@@ -172,11 +172,14 @@
     let actionID = 'none'; // Initialize the action ID
     let activityID = 'none'; 
     let adminUser = 'none';
+    let zoneID = null;
     let IS_ACTIVITY = false;
+    let optons = {};
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
       if (event.data.action === 'update-quiz') {
+        console.log('[Quiz Panel] Update Quiz Recieved - Data: ', event.data);
         questions = event.data.content || []; // Use provided questions
         analyticsKey = event.data.analytics || analyticsKey; // Update the analytics key
         popupID = event.data.popupID; // Update the popup ID
@@ -189,6 +192,8 @@
         actionID = event.data.actionID || actionID; // Update the action ID
         activityID = event.data.activityID || activityID;
         adminUser = event.data.adminUser || adminUser;
+        zoneID = event.data.zoneId || zoneID;
+        options = event.data.options || options;
         IS_ACTIVITY = !!event.data.isActivityComponent;
 
         // Select a random question if the flag is true
@@ -267,7 +272,6 @@
       timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
-    // Function to send analytics
     function sendAnalytics(quizResult) {
       const allCorrect = quizResult === 1;
       parent.postMessage({ 
@@ -280,7 +284,7 @@
           popupID: popupID,
           isActivityComponent: IS_ACTIVITY,
           adminUser,
-          zoneId,
+          zoneID,
           options
         }, '*');
     }
@@ -309,25 +313,15 @@
         allCorrect = false;
       }
 
-      // Check if this is the last question
-//      const isLastQuestion = currentQuestion >= questions.length - 1;
-
-      // Send the analytics event
-      sendAnalytics(quizResult);
+      sendAnalytics(quizResult);  // Send Analytics
 
       showFeedback(allCorrect); // Display feedback message
     }
 
-    // Function to display feedback
     function showFeedback(isCorrect) {
       const feedback = document.getElementById("feedback");
       feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
     }
-
-/*     // Initialize the quiz with a placeholder message
-    document.getElementById('quiz-title').textContent = ' ';
-    document.getElementById("question-text").textContent = "  "; */
-
 
     window.addEventListener('DOMContentLoaded', () => {
       parent.postMessage({ action: 'quiz-panel-ready' }, '*');
