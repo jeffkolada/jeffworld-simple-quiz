@@ -374,7 +374,7 @@ class SingleQuizActivityComponent extends BaseComponent {
                     }
                     },
                 correctAnswer: { enum: ['A', 'B', 'C', 'D' ], title: 'Correct Answer', default: 'A' },
-                duration: { type: 'number', title: 'Duration (ms)', default: 6000, minimum: 1000 }
+                duration: { type: 'number', title: 'Duration (ms)', default: 10000, minimum: 1000 }
             }
         },
 
