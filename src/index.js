@@ -1,7 +1,6 @@
 // Import necessary modules
 import { BasePlugin, BaseComponent } from 'vatom-spaces-plugins'
 
-
 export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     /** Plugin info */
@@ -59,13 +58,42 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                 { id: 'helpGuide', name: 'Help Guide', type: 'button', help: 'Provide instructions or a guide for the quiz' }
             ]
         });
+
+        this.objects.registerComponent(SingleQuizActivityComponent, {
+            id: 'activity-simplequiz',
+            name: 'Activity: Simple Quiz',
+            description: 'A single question Quiz'
+        })
     }
 
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
+      console.log('Message received in Quiz plugin: ', msg);
         if (msg.action == 'send-results') {
-//            console.log('Message received in Quiz plugin: ', msg);
+
+            // ACTIVITY COMPONENT
+            if (msg.isActivityComponent) {
+                const respondingUserId = await this.user.getID();
+
+                const payload = {
+                    activityType    : 'quiz',
+                    activityID      : msg.actionID,
+                    adminUser       : msg.adminUser,
+                    zoneId          : msg.zoneId        || null,
+                    options         : msg.options       || {},
+                    respondingUserId,
+                    response        : msg.result
+                }
+                this.hooks.trigger('activity-response', payload);
+
+                // Optionally close the popup quickly (to match original behavior)
+                if (msg.popupID) setTimeout(() => this.menus.closePopup(msg.popupID), 200);
+
+                return; // ← IMPORTANT: do NOT run the old analytics / completion path
+            }
+
+            // STANDARD QUIZ
             let analyticsKey = await msg.analytics;
             let result = await msg.result;
             let allCorrect = await msg.allCorrect;
@@ -167,7 +195,7 @@ class QuizComponent extends BaseComponent {
                     quizTitle: quizTitle,  // Include the quiz title in the message
                     endMessageWin: endMessageWin, // Include the win message in the message
                     endMessageLose: endMessageLose, // Include the lose message in the message
-                    timerOn: timerOn, // Include the timer status in the message
+                    timerOn: true, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
                     popupID: popupId,
                     actionID: actionID
@@ -277,7 +305,7 @@ class SingleQuizComponent extends BaseComponent {
                     popupID: popupId,
                     actionID: actionID
                 });
-            }, 600); // Delaying the message to ensure the iframe is fully loaded
+            }, 500); // Delaying the message to ensure the iframe is fully loaded
     
         } catch (error) {
             console.error('Error parsing questions:', error);
@@ -303,3 +331,254 @@ class SingleQuizComponent extends BaseComponent {
     }
 }
 
+
+
+
+
+class SingleQuizActivityComponent extends BaseComponent {
+
+    // Unprefixed: the platform prepends your plugin ID when attached to a zone
+    static id = 'activity-simplequiz'
+    static name = 'Simple Quiz'
+
+    myUserID = null
+
+    activityDescribe = (payload = {}) => {
+        const cid = payload && payload.componentID;
+        if (cid && !cid.endsWith(`:${this.constructor.id}`)) return null;
+        if (payload?.zoneId && payload.zoneId !== this.objectID) return null;
+
+        console.log('[ALERTNESS] describe called on', this.objectID || '(no object)', 'returns type=alertness');
+        return {
+        // REQUIRED
+        type: 'simplequiz',
+        title: 'Which answer is correct?',
+        shortTitle: 'Quiz',
+        description: 'A simple multiple-choice quiz',
+        icon: this.paths.absolute('icons/quiz.svg'),   // put an icon file if you have one
+        supportsDuration: true,
+        optionsSchema: {
+            type: 'object',
+            properties: {
+                title: { type: 'string', title: 'Question', default: 'Which is the Correct Answer?' },
+                answerChoices: {
+                    ui: 'group',
+                    type: 'object',
+                    title: 'Answer Choices',
+                    order: ['A','B','C','D'], // render order
+                    properties: {
+                        A: { type: 'string', default: '',   placeholder: 'Option A' },
+                        B: { type: 'string', default: '', placeholder: 'Option B' },
+                        C: { type: 'string', default: '',    placeholder: 'Option C (optional)' },
+                        D: { type: 'string', default: '',           placeholder: 'Option D (optional)' }
+                    }
+                    },
+                correctAnswer: { enum: ['A', 'B', 'C', 'D' ], title: 'Correct Answer', default: 'A' },
+                duration: { type: 'number', title: 'Duration (ms)', default: 10000, minimum: 1000 }
+            }
+        },
+
+        componentID: `${this.plugin.constructor.id}:${this.constructor.id}`,
+        zoneId: this.objectID || null,
+        vendor: (this.plugin && this.plugin.constructor && this.plugin.constructor.id) || null
+        }
+    }
+
+    buildQuestionsFromOptions(options = {}) {
+        const q = String(options.question || options.title || 'Untitled question');
+
+        // 1) Collect raw choices from preferred/new keys, then legacy keys
+        let base = Array.isArray(options.answers) ? options.answers
+                : Array.isArray(options.answerChoices) ? options.answerChoices
+                : [options.optionA, options.optionB, options.optionC, options.optionD];
+
+        base = Array.isArray(base) ? base : [];
+        // Keep original indices so we can remap the "correct" answer after filtering blanks
+        let entries = base
+            .map((v, i) => ({ text: (v == null ? '' : String(v).trim()), i }))
+            .filter(e => e.text.length > 0);            // <-- drop empty choices
+
+        // 2) Determine the originally selected "correct" index (before filtering)
+        const letterMap = { A:0, B:1, C:2, D:3 };
+        let selectedOriginalIndex = 0;
+        if (typeof options.correct === 'number' && Number.isFinite(options.correct)) {
+            selectedOriginalIndex = options.correct;
+        } else if (options.correctAnswer != null) {   // supports your schema's 'correctAnswer'
+            const k = String(options.correctAnswer).trim().toUpperCase();
+            selectedOriginalIndex = letterMap[k] ?? 0;
+        } else if (options.correctChoice != null) {   // and 'correctChoice' if used elsewhere
+            const k = String(options.correctChoice).trim().toUpperCase();
+            selectedOriginalIndex = letterMap[k] ?? 0;
+        }
+
+        // 3) Remap "correct" to the new index after filtering out empties
+        let correct = 0;
+        const remapped = entries.findIndex(e => e.i === selectedOriginalIndex);
+        correct = remapped >= 0 ? remapped : 0;
+
+        // 4) Ensure at least two choices; pad with sensible defaults if needed
+        if (entries.length < 2) {
+            const defaults = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+            for (let j = 0; entries.length < 2 && j < defaults.length; j++) {
+            entries.push({ text: defaults[j], i: 100 + j });
+            }
+            // If original correct vanished and we padded, keep correct at 0
+            if (correct >= entries.length) correct = 0;
+        }
+
+        const choices = entries.map(e => e.text);
+
+        return [{
+            question: q,
+            choices,     // no empty strings included
+            correct      // index aligned to filtered choices
+        }];
+    }
+
+    // Start handler (arrow fn keeps `this`)
+    activityStart = async (payload) => {
+        console.log('[QUIZ ACTIVITY] ActivityStart ', payload);
+        // ACTIVITY FILTERS & REQUIRED DATA
+        const myID = this.myUserID || await this.plugin.user.getID();
+        const byType = payload?.type === 'simplequiz';
+        const byID   = typeof payload?.componentID === 'string' && payload.componentID.endsWith(':activity-simplequiz');
+        if (!(byType || byID)) return false;
+        if (payload?.targetUserId && payload.targetUserId !== myID) return false; // user filter
+        if (payload?.zoneId && payload.zoneId !== this.objectID) return false;    // zone filter
+        // END ACTIVITY DATA
+
+        const { activityID, adminUser, zoneId, options = {} } = payload;
+        console.log('[QUIZ ACTIVITY] Started with options:', options);
+
+        // Build the quiz content from Manager options
+        const content = this.buildQuestionsFromOptions(options);
+        console.log('[QUIZ ACTIVITY] BuildQuestionsFromOptions Start: ', content);
+
+        // Decide timer flags for the panel
+        const durationMs   = Math.max(1, Number(options.duration || 6000));
+        const timerOn      = true;                 // panel expects a boolean; we turn it on when duration is provided
+        const timerDuration= (durationMs/1000);
+
+        // Reasonable fallbacks for other panel-required keys
+        const randomQuestion = false;
+        const limitResponse  = false;
+        const quizTitle      = String(options.title || 'Quiz');
+        const endMessageWin  = 'Congratulations! You answered correctly!';
+        const endMessageLose = `Sorry, that's incorrect.`;
+        const actionID       = activityID;
+
+        // Open the panel and pass data (replaces getField()-based config)
+        const popupId = await this.plugin.menus.displayPopup({
+            title: quizTitle,
+            panel: {
+            iframeURL: this.paths.absolute('./quiz-panel-singlequestion.html'),
+            width: 600,
+            height: 650,
+            onClose: () => { this.isPopupOpen = false; }
+            }
+        });
+        this.isPopupOpen = true;
+
+        // Send the quiz data to the panel (wait a tick so iframe is ready)
+        setTimeout(() => {
+            this.plugin.menus.postMessage({
+            action: 'update-quiz',
+            content,                 // ← [{ question, choices, correct }]
+            randomQuestion,
+            limitResponse,
+            quizTitle,
+            endMessageWin,
+            endMessageLose,
+            timerOn,
+            timerDuration,
+            popupID: popupId,
+            actionID: activityID,
+            isActivityComponent: true,
+            asminUser: adminUser,
+            zoneId,
+            options,
+            });
+        }, 400);
+
+        // DO NOT send a response yet — the quiz-panel should post the answer later
+        return true;
+    };
+
+    async sendResponse(payload, response) {
+        const { activityID, adminUser, zoneId, options = {} } = payload;
+        const myID = this.myUserID || await this.plugin.user.getID();
+
+        this.plugin.messages.send({
+            action: 'activity-response',
+            global: true,
+            payload: {
+            activityType: 'quiz',
+            activityID,
+            zoneId,
+            options: { ...options, respondingUserId: myID },
+            respondingUserId: myID,
+            response
+            }
+        }, true, adminUser);
+    }
+
+    async onMessage(msg) {
+        if (msg?.action !== 'send-results') return false;
+
+        const actionID = String(msg.actionID || '');
+        if (!actionID.startsWith('quiz-')) {        // Only re-route if this quiz was launched by the Activity Manager:
+            return false; // let the third-party plugin handle its non-Activity runs
+        }
+
+        // Extract the original activityID we generated in activityStart
+        const activityID = actionID.slice(5); // remove "quiz-"
+        const zoneId     = msg.zoneId || this.objectID || null;
+        const options    = msg.options || {}; // echo-through if the panel included them
+
+        // Normalize a compact response payload for Activities Manager
+        // - If your panel already builds a richer object, you can pass it directly as "response"
+        const result = msg.result || {};
+        const response = {
+            // Preserve what the panel gave you. Common fields you might emit:
+            // selectedIndex: result.selectedIndex ?? null,
+            // correct: !!msg.allCorrect,
+            // raw: result
+            ...result,
+            allCorrect: !!msg.allCorrect
+        };
+
+        // Emit the standard Activities response (updates counts, archive, etc.)
+        await this.sendResponse(
+            { activityID, adminUser: null, zoneId, options },
+            response
+        );
+
+        // Close the popup (mirrors the third-party plugin behavior)
+        if (msg.popupID) {
+            setTimeout(() => this.plugin.menus.closePopup(msg.popupID), 200);
+        }
+
+        return true;
+    }
+
+
+    async onLoad() {
+    this.myUserID = await this.plugin.user.getID();
+
+    // Register on the plugin’s hook bus (from a component use `this.plugin.hooks`)
+    this.plugin.hooks.addHandler('vatom-activities-start', this.activityStart);
+    this.plugin.hooks.addHandler('vatom-activities-info',  this.activityDescribe);
+
+    const objId = this.objectID || '(no object id)'
+    console.log('[QUIZ ACTIVITY] Loaded on', objId, 'user', this.myUserID)
+    console.log('[QUIZ ACTIVITY] onLoad → handlers registered. objectID=', this.objectID || '(no object)')
+    }
+
+    async onUnload() {
+    this.plugin.hooks.removeHandler('vatom-activities-start', this.activityStart)
+    this.plugin.hooks.removeHandler('vatom-activities-info',  this.activityDescribe)
+    }
+
+}
+
+export const components = [ SingleQuizActivityComponent ]
