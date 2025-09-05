@@ -170,6 +170,9 @@
     let currentQuestion = 0; // Initialize the current question index
     let limitResponse; // Initialize the limit response
     let actionID = 'none'; // Initialize the action ID
+    let activityID = 'none'; 
+    let adminUser = 'none';
+    let IS_ACTIVITY = false;
 
     // Listen for messages from the parent window
     window.addEventListener('message', (event) => {
@@ -184,6 +187,9 @@
         randomQuestion = event.data.randomQuestion || randomQuestion; // Update the random question flag
         limitResponse = event.data.limitResponse || limitResponse; // Update the limit response
         actionID = event.data.actionID || actionID; // Update the action ID
+        activityID = event.data.activityID || activityID;
+        adminUser = event.data.adminUser || adminUser;
+        IS_ACTIVITY = !!event.data.isActivityComponent;
 
         // Select a random question if the flag is true
         if (randomQuestion && questions.length > 0) {
@@ -272,6 +278,10 @@
           limitResponse: limitResponse,
           actionID: actionID,
           popupID: popupID,
+          isActivityComponent: IS_ACTIVITY,
+          adminUser,
+          zoneId,
+          options
         }, '*');
     }
 
@@ -317,6 +327,18 @@
 /*     // Initialize the quiz with a placeholder message
     document.getElementById('quiz-title').textContent = ' ';
     document.getElementById("question-text").textContent = "  "; */
+
+
+    window.addEventListener('DOMContentLoaded', () => {
+      parent.postMessage({ action: 'quiz-panel-ready' }, '*');
+    });
+
+    // If no questions arrive shortly, ask the parent explicitly
+    setTimeout(() => {
+      if (!questions || questions.length === 0) {
+        parent.postMessage({ action: 'request-quiz', popupID }, '*');
+      }
+    }, 800);
   </script>
 </body>
 
