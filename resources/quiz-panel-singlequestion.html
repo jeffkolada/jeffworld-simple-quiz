@@ -63,7 +63,7 @@
     actionID: 'none',
     activityID: 'none',
     adminUser: 'none',
-    zoneID: null,
+    zoneId: null,
     isActivity: false,
     options: {},
     timerHandle: null,
@@ -85,6 +85,16 @@
     if (Array.isArray(payload?.questions)) return payload.questions;
     if (Array.isArray(payload)) return payload;
     return [];
+  }
+
+  function getChoiceText(choice) {
+    if (choice == null) return null;
+    if (typeof choice === 'string') return choice;
+    if (typeof choice === 'object') {
+      // common object shapes: {label}, {text}, {value}
+      return choice.label ?? choice.text ?? (choice.value != null ? String(choice.value) : null);
+    }
+    return String(choice);
   }
 
   function stopTimer() {
@@ -196,7 +206,7 @@
     state.actionID        = coalesce(payload.actionID, state.actionID);
     state.activityID      = coalesce(payload.activityID, state.activityID);
     state.adminUser       = coalesce(payload.adminUser, state.adminUser);
-    state.zoneID          = coalesce(payload.zoneID, state.zoneID);
+    state.zoneId          = coalesce(payload.zoneId, state.zoneId);
     state.isActivity      = !!payload.isActivityComponent;
     state.options         = coalesce(payload.options, state.options);
     state.quizTitle       = coalesce(payload.quizTitle, state.quizTitle);
@@ -217,13 +227,15 @@
     if (feedback) feedback.textContent = isCorrect ? state.endMessageWin : state.endMessageLose;
   }
 
-  function sendAnalytics(quizResult, response, correctAnswer) {
+  function sendAnalytics( quizResult, responseText, correctAnswerText ) {
     const allCorrect = quizResult === 1;
+
     parent.postMessage({
       action: 'send-results',
       result: quizResult,
-      response,
-      correctAnswer,
+      response: responseText,
+      correctAnswer: correctAnswerText,
+      // --- existing metadata ---
       analytics: state.analyticsKey,
       allCorrect,
       limitResponse: state.limitResponse,
@@ -231,10 +243,11 @@
       popupID: state.popupID,
       isActivityComponent: state.isActivity,
       adminUser: state.adminUser,
-      zoneID: state.zoneID,
+      zoneId: state.zoneId,
       options: state.options
     }, '*');
   }
+
 
   function checkAnswer(selected) {
     stopTimer();
@@ -257,7 +270,29 @@
       quizResult = 0; allCorrect = false;
     }
 
-    sendAnalytics(quizResult, selected, state.selectedQuestion.correct);
+    // --- NEW: derive human-readable strings for analytics ---
+    const choiceList = Array.isArray(state.selectedQuestion?.choices) ? state.selectedQuestion.choices : [];
+    const correctIdx  = (state.selectedQuestion?.correct ?? -1);
+    const selectedIdx = (selected ?? null);
+
+    const responseText      = (selectedIdx != null && choiceList[selectedIdx] !== undefined)
+      ? getChoiceText(choiceList[selectedIdx])
+      : null;
+
+    const correctAnswerText = (correctIdx >= 0 && choiceList[correctIdx] !== undefined)
+      ? getChoiceText(choiceList[correctIdx])
+      : null;
+
+    const questionText = state.selectedQuestion?.question ?? null;
+
+    // Send both numeric indices and text versions
+    sendAnalytics(
+      quizResult,
+      responseText,
+      correctAnswerText
+    );
+
+    console.log('[QUIZ PANEL] Send Analytics: ', { quizResult, responseText, correctAnswerText });
     showFeedback(allCorrect);
   }
 
