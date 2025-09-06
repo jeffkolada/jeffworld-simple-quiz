@@ -1,7 +1,7 @@
 {
   "id": "jeffworldquiz",
   "name": "Simple Quiz",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "beta": true,
   "pluginType": "Business",
   "description": "Attach a simple quiz popup to any object.",
@@ -10,6 +10,6 @@
   "category": "Games",
   "businessId": "hCsur3Hk00",
   "price": 0,
-  "releaseNotes": "update defaults",
-  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/d590c5219203ec932ec367b5cb26bf78/plugin.js"
+  "releaseNotes": "fix bugs with activities",
+  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/d093478e5c4ff984594a48b1c08fb81d/plugin.js"
 }
