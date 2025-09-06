@@ -69,7 +69,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-      console.log('Message received in Quiz plugin: ', msg);
+      console.log('[QUIZ BASEPLUGIN] onMessage : ', msg);
       const { action, result, response, correctAnswer, analytics, allCorrect, limitResponse, actionID, popupID, IS_ACTIVITY, adminUser, zoneId, options} = msg; 
       
       if (msg.action == 'send-results') {
@@ -156,7 +156,7 @@ class QuizComponent extends BaseComponent {
         }
 
         if (this.isPopupOpen) {
-//            console.log('Popup is already open'); // Prevent opening another popup
+//            console.log('[QUIZ ACTIVITY] Popup is already open'); // Prevent opening another popup
             return;
         }
 
@@ -170,12 +170,12 @@ class QuizComponent extends BaseComponent {
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             const actionID = this.getField('action-id'); // Retrieve the action ID
-//            console.log('Panel Opened');                                                                  // Console Log ()
+//            console.log('[QUIZ ACTIVITY] Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
             let propertyTaken = await this.plugin.user.getProperty('', 'quiz' + analyticsKey);
-//            console.log('Property Taken:', propertyTaken);
+//            console.log('[QUIZ ACTIVITY] Property Taken:', propertyTaken);
 
             const popupID = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
@@ -355,7 +355,7 @@ class SingleQuizActivityComponent extends BaseComponent {
         if (cid && !cid.endsWith(`:${this.constructor.id}`)) return null;
         if (payload?.zoneId && payload.zoneId !== this.objectID) return null;
 
-        console.log('[ALERTNESS] describe called on', this.objectID || '(no object)', 'returns type=alertness');
+        console.log('[QUIZ ACTIVITY] describe called on', this.objectID || '(no object)', 'returns type=alertness');
         return {
         // REQUIRED
         type: 'simplequiz',
@@ -455,6 +455,8 @@ class SingleQuizActivityComponent extends BaseComponent {
         // END ACTIVITY DATA
 
         const { activityID, adminUser, zoneId, options = {} } = payload;
+
+        // The quiz plugin’s own action/trigger id (unchanged semantics)
         console.log('[QUIZ ACTIVITY] Started with options:', options);
 
         // Build the quiz content from Manager options
@@ -488,7 +490,7 @@ class SingleQuizActivityComponent extends BaseComponent {
             limitResponse, quizTitle, 
             endMessageWin, endMessageLose, 
             timerOn, timerDuration,
-            popupID, actionID, 
+            popupID, actionID, activityID,
             isActivityComponent, adminUser, 
             zoneId, options
         }
@@ -499,7 +501,7 @@ class SingleQuizActivityComponent extends BaseComponent {
 
     async updatePanelContent(data) {
         const {content, randomQuestion, limitResponse, quizTitle, endMessageWin, endMessageLose, timerOn,
-            timerDuration, popupID, activityID, isActivityComponent, adminUser, zoneId, options} = data; 
+            timerDuration, popupID, actionID, activityID, isActivityComponent, adminUser, zoneId, options} = data; 
             
         this.plugin.menus.postMessage({
             action: 'update-quiz',
@@ -512,13 +514,14 @@ class SingleQuizActivityComponent extends BaseComponent {
             timerOn,
             timerDuration,
             popupID,
+            actionID,
             activityID,
-            isActivityComponent,
+            isActivityComponent: true,
             adminUser,
             zoneId,
             options
             });
-        console.log('[Update Panel Content]', data);
+        console.log('[QUIZ ACTIVITY] Update Panel Content: ', data);
     }
 
     async sendResponse(payload, response) {
@@ -540,7 +543,7 @@ class SingleQuizActivityComponent extends BaseComponent {
     }
 
     async onMessage(msg) {
-    console.log('Message received in Aquiz Activity Component: ', msg);
+    console.log('[QUIZ ACTIVITY] Message received in Quiz Activity Component: ', msg);
         if (msg?.action !== 'send-results') {
 
             const actionID = String(msg.actionID || '');

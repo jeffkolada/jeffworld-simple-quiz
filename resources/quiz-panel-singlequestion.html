@@ -211,6 +211,8 @@
     state.options         = coalesce(payload.options, state.options);
     state.quizTitle       = coalesce(payload.quizTitle, state.quizTitle);
 
+    console.log('[QUIZ PANEL] Current State: ', state);
+
     // Questions last (depends on shape)
     const incoming = parseIncomingQuestions(payload);
     if (incoming.length) state.questions = incoming;
@@ -296,7 +298,8 @@
     showFeedback(allCorrect);
   }
 
-  // --- Messaging ---
+  //  ---  Messaging  ---  //
+
   function handleMessage(event) {
     console.log('[QUIZ PANEL] Message Recieved: ', event);
     const data = event?.data || {};
