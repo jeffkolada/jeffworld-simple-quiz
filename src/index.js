@@ -71,7 +71,10 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     async onMessage(msg) {
       console.log('[QUIZ BASEPLUGIN] onMessage : ', msg);
       const { action, result, response, correctAnswer, analytics, allCorrect, limitResponse, actionID, popupID, IS_ACTIVITY, adminUser, zoneId, options} = msg; 
-      
+      if (msg.action == 'request-quiz') {
+        
+      }
+
       if (msg.action == 'send-results') {
             // ACTIVITY COMPONENT
             if (msg.isActivityComponent) {
@@ -121,8 +124,9 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 //            console.log('Quiz Completed:', quizTakenName, "Closing Popup:", popupID);
             setTimeout(() => {
                 this.menus.closePopup(popupID);
-              }, 2000);
+              }, 3000);
         }
+
     }
 
 }
@@ -205,7 +209,7 @@ class QuizComponent extends BaseComponent {
                     popupID: popupID,
                     actionID: actionID
                 });
-            }, 600); // Delaying the message to ensure the iframe is fully loaded
+            }, 1250); // Delaying the message to ensure the iframe is fully loaded
     
         } catch (error) {
             console.error('Error parsing questions:', error);
@@ -312,7 +316,7 @@ class SingleQuizComponent extends BaseComponent {
                     popupID: popupID,
                     actionID: actionID
                 });
-            }, 500); // Delaying the message to ensure the iframe is fully loaded
+            }, 1250); // Delaying the message to ensure the iframe is fully loaded
     
         } catch (error) {
             console.error('Error parsing questions:', error);
@@ -494,7 +498,7 @@ class SingleQuizActivityComponent extends BaseComponent {
             isActivityComponent, adminUser, 
             zoneId, options
         }
-        setTimeout(() => {this.updatePanelContent(panelContent)}, 400)
+        setTimeout(() => {this.updatePanelContent(panelContent)}, 1250)
 
         return true;
     };
@@ -568,7 +572,7 @@ class SingleQuizActivityComponent extends BaseComponent {
 
             // Close the popup (mirrors the third-party plugin behavior)
             if (msg.popupID) {
-                setTimeout(() => this.plugin.menus.closePopup(msg.popupID), 200);
+                setTimeout(() => this.plugin.menus.closePopup(msg.popupID), 2000);
             }
 
         }
