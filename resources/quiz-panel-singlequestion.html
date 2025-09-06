@@ -192,7 +192,7 @@
         actionID = event.data.actionID || actionID; // Update the action ID
         activityID = event.data.activityID || activityID;
         adminUser = event.data.adminUser || adminUser;
-        zoneID = event.data.zoneId || zoneID;
+        zoneID = event.data.zoneID || zoneID;
         options = event.data.options || options;
         IS_ACTIVITY = !!event.data.isActivityComponent;
 
@@ -272,11 +272,13 @@
       timerBar.style.width = width;                                                     // Set the current width to stop the bar
     }
 
-    function sendAnalytics(quizResult) {
+    function sendAnalytics(quizResult, response, correctAnswer) {
       const allCorrect = quizResult === 1;
       parent.postMessage({ 
           action: 'send-results', 
           result: quizResult,
+          response: response,
+          correctAnswer: correctAnswer,
           analytics: analyticsKey,
           allCorrect: allCorrect,
           limitResponse: limitResponse,
@@ -313,7 +315,7 @@
         allCorrect = false;
       }
 
-      sendAnalytics(quizResult);  // Send Analytics
+      sendAnalytics(quizResult, selected, selectedQuestion.correct);  // Send Analytics
 
       showFeedback(allCorrect); // Display feedback message
     }

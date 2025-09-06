@@ -70,20 +70,24 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
       console.log('Message received in Quiz plugin: ', msg);
-        if (msg.action == 'send-results') {
+      const { action, result, response, correctAnswer, analytics, allCorrect, limitResponse, actionID, popupID, IS_ACTIVITY, adminUser, zoneID, options} = msg; if (msg.action == 'send-results') {
 
             // ACTIVITY COMPONENT
             if (msg.isActivityComponent) {
                 const respondingUserId = await this.user.getID();
+                options.response = response;
+                options.correctAnswer = correctAnswer;
 
                 const payload = {
                     activityType    : 'quiz',
-                    activityID      : msg.actionID,
-                    adminUser       : msg.adminUser,
-                    zoneId          : msg.zoneId        || null,
-                    options         : msg.options       || {},
+                    activityID      : actionID,
+                    adminUser       : adminUser,
+                    zoneID          : zoneID        || null,
+                    options         : options       || {},
                     respondingUserId,
-                    response        : msg.result
+                    result          : result,
+                    response        : response,
+                    correctAnswer   : correctAnswer,
                 }
                 this.hooks.trigger('activity-response', payload);
 
@@ -239,6 +243,7 @@ class SingleQuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
+        let options = {};
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -302,6 +307,7 @@ class SingleQuizComponent extends BaseComponent {
                     endMessageLose: endMessageLose, // Include the lose message in the message
                     timerOn: timerOn, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
+                    options: options,
                     popupID: popupId,
                     actionID: actionID
                 });
@@ -346,7 +352,7 @@ class SingleQuizActivityComponent extends BaseComponent {
     activityDescribe = (payload = {}) => {
         const cid = payload && payload.componentID;
         if (cid && !cid.endsWith(`:${this.constructor.id}`)) return null;
-        if (payload?.zoneId && payload.zoneId !== this.objectID) return null;
+        if (payload?.zoneID && payload.zoneID !== this.objectID) return null;
 
         console.log('[ALERTNESS] describe called on', this.objectID || '(no object)', 'returns type=alertness');
         return {
@@ -379,7 +385,7 @@ class SingleQuizActivityComponent extends BaseComponent {
         },
 
         componentID: `${this.plugin.constructor.id}:${this.constructor.id}`,
-        zoneId: this.objectID || null,
+        zoneID: this.objectID || null,
         vendor: (this.plugin && this.plugin.constructor && this.plugin.constructor.id) || null
         }
     }
@@ -444,10 +450,10 @@ class SingleQuizActivityComponent extends BaseComponent {
         const byID   = typeof payload?.componentID === 'string' && payload.componentID.endsWith(':activity-simplequiz');
         if (!(byType || byID)) return false;
         if (payload?.targetUserId && payload.targetUserId !== myID) return false; // user filter
-        if (payload?.zoneId && payload.zoneId !== this.objectID) return false;    // zone filter
+        if (payload?.zoneID && payload.zoneID !== this.objectID) return false;    // zone filter
         // END ACTIVITY DATA
 
-        const { activityID, adminUser, zoneId, options = {} } = payload;
+        const { activityID, adminUser, zoneID, options = {} } = payload;
         console.log('[QUIZ ACTIVITY] Started with options:', options);
 
         // Build the quiz content from Manager options
@@ -495,7 +501,7 @@ class SingleQuizActivityComponent extends BaseComponent {
             actionID: activityID,
             isActivityComponent: true,
             asminUser: adminUser,
-            zoneId,
+            zoneID,
             options,
             });
         }, 400);
@@ -505,7 +511,7 @@ class SingleQuizActivityComponent extends BaseComponent {
     };
 
     async sendResponse(payload, response) {
-        const { activityID, adminUser, zoneId, options = {} } = payload;
+        const { activityID, adminUser, zoneID, options = {} } = payload;
         const myID = this.myUserID || await this.plugin.user.getID();
 
         this.plugin.messages.send({
@@ -514,7 +520,7 @@ class SingleQuizActivityComponent extends BaseComponent {
             payload: {
             activityType: 'quiz',
             activityID,
-            zoneId,
+            zoneID,
             options: { ...options, respondingUserId: myID },
             respondingUserId: myID,
             response
@@ -532,7 +538,7 @@ class SingleQuizActivityComponent extends BaseComponent {
 
         // Extract the original activityID we generated in activityStart
         const activityID = actionID.slice(5); // remove "quiz-"
-        const zoneId     = msg.zoneId || this.objectID || null;
+        const zoneID     = msg.zoneID || this.objectID || null;
         const options    = msg.options || {}; // echo-through if the panel included them
 
         // Normalize a compact response payload for Activities Manager
@@ -549,7 +555,7 @@ class SingleQuizActivityComponent extends BaseComponent {
 
         // Emit the standard Activities response (updates counts, archive, etc.)
         await this.sendResponse(
-            { activityID, adminUser: null, zoneId, options },
+            { activityID, adminUser: null, zoneID, options },
             response
         );
 

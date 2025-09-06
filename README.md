@@ -4,7 +4,7 @@ This is a simple multi-question quiz. When the quiz is finished, it can send an 
 
 ## Quiz Content
 
-To customize your quiz, use the format below. There is no limit on the number of questions, however you must use **three** answer options per question.
+To customize your quiz, use the format below. There is no limit on the number of questions, however you must use **between two and four** answer options per question.
 
 When choosing the correct answer, start from value 0 for the first answer. In the example below, "Non-Fungible Token" is the correct answer, and the "correct" value is 0. If the second answer is correct, use value of 1.
 
