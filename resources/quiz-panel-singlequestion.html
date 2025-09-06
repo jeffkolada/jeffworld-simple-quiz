@@ -10,131 +10,24 @@
           src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
       }
 
-      body {
-          font-family: 'Outfit', sans-serif;
-          background-color: #000000;
-          color: aliceblue;
-          margin: 0;
-          padding: 25px; /* Add padding to the body */
-          box-sizing: border-box; /* Include padding in the body's total width and height */
-          height: 100vh; /* Full viewport height */
-          display: flex;
-          justify-content: center;
-          text-align: center; /* Center align all content */
-      }
-
-      .quiz-container {
-          box-sizing: border-box;
-          width: calc(100% - 50px); /* Adjust width to account for body padding */
-          max-width: 600px;
-          padding: 2em;
-          background-color: #191919;
-          border-radius: 20px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          height: calc(100% - 50px); /* Adjust height to account for body padding */
-          display: flex;
-          flex-direction: column; /* Stack children vertically */
-          justify-content: center; /* Center align all content */
-          align-items: center;
-      }
-
-      .choices {
-          display: flex;
-          flex-direction: column;
-          width: 100%; /* Fill the width of the container */
-          padding: 10px;
-      }
-
-      .choice {
-          font-family: 'Outfit', sans-serif;
-          font-weight: 300;
-          font-size: 1em;
-          margin: 5px 0; /* Margin between buttons */
-          padding: .5em .75em;
-          background-color: #393939;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          width: 400px; /* Set width of the buttons */
-          max-width: 550px; /* Set maximum width */
-          height: 60px; /* Set a fixed height */
-          box-sizing: border-box;
-          transition: background-color 0.3s ease; /* Smooth transition for background color */
-      }
-
-      .choice:hover {
-          background-color: #4a5056;
-      }
-
-      .correct-answer {
-          background-color: rgba(15, 162, 15, 0.694); /* Highlight correct answer with green color */
-      }
-
-      .incorrect-answer {
-        background-color: rgba(210, 47, 47, 0.567); /* Highlight incorrect answer with red color */
-      }
-
-
-      .feedback-container {
-          position: relative;
-          width: 400px; /* Fill the width of the container */
-          height: 30px; /* Set a fixed height for the spacer */
-          margin-top: 10px; /* Add some spacing above the feedback */
-          background-color: rgba(255, 255, 255, 0); /* 0% opacity */
-      }
-
-      .feedback-background {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 400px;
-          height: 30px;
-          background-color: rgba(255, 255, 255, 0);
-      }
-
-      .feedback-content {
-          position: relative;
-          z-index: 1; /* Ensure it appears above the background */
-          margin: 0; /* Remove default margin */
-          line-height: 30px; /* Center text vertically */
-          width: 100%; /* Fill the width of the container */
-      }
-
-
-      .quiz-title {
-          text-align: center;
-      }
-
-      .timer-bar-container {
-          position: relative;
-          height: 5px; /* Total height of both bars */
-          width: 100%; /* Fill the width of the container */
-          margin-bottom: 20px; /* Add some space below the timer bar */
-      }
-
-      .timer-bar-background {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 5px;
-          width: 100%;
-          background-color: rgba(255, 255, 255, 0.10);
-          opacity: 100;
-          border-radius: 2px;
-      }
-
-      .timer-bar {
-          position: absolute;
-          top: 0;
-          left: 0;
-          height: 5px;
-          background-color: rgb(170, 170, 170);
-          width: 0%; /* Initially zero width */
-          border-radius: 2px;
-          transition: width linear;
-      }
-  </style>
+      body { font-family: 'Outfit', sans-serif; background-color: #000000; color: aliceblue; margin: 0; box-sizing: border-box; height: 100vh; display: flex; justify-content: center; text-align: center; }
+      .quiz-container { box-sizing: border-box; width: calc(100% - 50px); max-width: 600px; padding: 2em; border-radius: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); height: calc(100% - 50px); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+      h1 { margin-top: 15px; margin-bottom: 10px; }
+      p { margin-top: 10px; margin-bottom: 10px;   text-align:center; font-size: clamp(18px, 3cqw, 28px); line-height: 1.15; text-wrap: balance; overflow-wrap: anywhere; hyphens: auto; }
+      .choices { display: flex; flex-direction: column; padding: 10px; }
+      .choice { font-family: 'Outfit', sans-serif; font-weight: 300; font-size: 1em; margin: 5px 0; padding: .5em .75em; background-color: #393939; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; max-width: 550px; height: 60px; box-sizing: border-box; transition: background-color 0.2s ease; }
+      .choice:hover { background-color: #4a5056; }
+      .choice.disable-hover:hover { background-color: #393939; }
+      .correct-answer { background-color: rgba(15, 162, 15, 0.694); }
+      .incorrect-answer { background-color: rgba(210, 47, 47, 0.567); }
+      .feedback-container { position: relative; width: 400px; height: 20px; margin-top: 1px; background-color: rgba(255, 255, 255, 0); } 
+      .feedback-background { position: absolute; top: 0; left: 0; width: 400px; height: 20px; background-color: rgba(255, 255, 255, 0); }
+      .feedback-content { position: relative; z-index: 1; margin: 0; line-height: 20px; width: 100%; }
+      .quiz-title { text-align: center; }
+      .timer-bar-container { position: relative; height: 5px; width: 100%; margin-bottom: 20px; }
+      .timer-bar-background { position: absolute; top: 0; left: 0; height: 5px; width: 100%; background-color: rgba(255, 255, 255, 0.10); opacity: 100; border-radius: 2px; }
+      .timer-bar { position: absolute; top: 0; left: 0; height: 5px; background-color: rgb(170, 170, 170); width: 0%; border-radius: 2px; transition: width linear; } 
+</style>
   
 </head>
 <body>
@@ -143,7 +36,6 @@
       <div class="timer-bar-background"></div>
       <div class="timer-bar" id="timer-bar"></div>
     </div>
-    <h1 id="quiz-title"></h1>
     <div class="question">
       <p id="question-text"></p>
       <div class="choices" id="choices-container">
@@ -156,184 +48,280 @@
     </div>
   </div>
   <script>
-    let analyticsKey = 'null';
-    let popupID = 'null'; 
-    let timerOn = false; // Initialize timerOn to false
-    let timerDuration = 10; // Default timer duration if not provided
-    let endMessageWin = 'Congratulations! You answered correctly!';
-    let endMessageLose = 'Try again next time.';
-    let randomQuestion = false; // Initialize random question flag
-    let questions = []; // Initialize as empty array
-    let selectedQuestion = null; // Initialize the selected question
-    let timerInterval;
-    let quizResult = 0; // Initialize the quiz result
-    let currentQuestion = 0; // Initialize the current question index
-    let limitResponse; // Initialize the limit response
-    let actionID = 'none'; // Initialize the action ID
-    let activityID = 'none'; 
-    let adminUser = 'none';
-    let zoneID = null;
-    let IS_ACTIVITY = false;
-    let optons = {};
+  // --- State ---
+  let state = {
+    analyticsKey: null,
+    popupID: null,
+    timerOn: false,
+    timerDuration: 10,
+    endMessageWin: 'Congratulations! You answered correctly!',
+    endMessageLose: 'Try again next time.',
+    randomQuestion: false,
+    questions: [],
+    selectedQuestion: null,
+    limitResponse: undefined,
+    actionID: 'none',
+    activityID: 'none',
+    adminUser: 'none',
+    zoneId: null,
+    isActivity: false,
+    options: {},
+    timerHandle: null,
+    gotData: false
+  };
 
-    // Listen for messages from the parent window
-    window.addEventListener('message', (event) => {
-      if (event.data.action === 'update-quiz') {
-        console.log('[Quiz Panel] Update Quiz Recieved - Data: ', event.data);
-        questions = event.data.content || []; // Use provided questions
-        analyticsKey = event.data.analytics || analyticsKey; // Update the analytics key
-        popupID = event.data.popupID; // Update the popup ID
-        timerOn = event.data.timerOn || timerOn; // Update the timer status
-        timerDuration = event.data.timerDuration || timerDuration; // Update the timer duration
-        endMessageWin = event.data.endMessageWin || endMessageWin; // Update the end message
-        endMessageLose = event.data.endMessageLose || endMessageLose; // Update the end message
-        randomQuestion = event.data.randomQuestion || randomQuestion; // Update the random question flag
-        limitResponse = event.data.limitResponse || limitResponse; // Update the limit response
-        actionID = event.data.actionID || actionID; // Update the action ID
-        activityID = event.data.activityID || activityID;
-        adminUser = event.data.adminUser || adminUser;
-        zoneID = event.data.zoneId || zoneID;
-        options = event.data.options || options;
-        IS_ACTIVITY = !!event.data.isActivityComponent;
+  // --- Utilities ---
+  const coalesce = (v, fallback) => (v !== undefined ? v : fallback);
 
-        // Select a random question if the flag is true
-        if (randomQuestion && questions.length > 0) {
-          selectedQuestion = questions[Math.floor(Math.random() * questions.length)];
-        } else {
-          selectedQuestion = questions[0]; // Use the first question if not random
-        }
+  function parseIncomingQuestions(payload) {
+    // Accept several shapes:
+    // - payload.content = [ {question, choices, correct}, ... ]
+    // - payload.content = { questions: [...] }
+    // - payload.questions = [...]
+    // - payload = [ ... ] (edge cases)
+    const c = payload?.content;
+    if (Array.isArray(c)) return c;
+    if (c && Array.isArray(c.questions)) return c.questions;
+    if (Array.isArray(payload?.questions)) return payload.questions;
+    if (Array.isArray(payload)) return payload;
+    return [];
+  }
 
-        const quizTitleElement = document.getElementById('quiz-title');
-        if (quizTitleElement) {
-          quizTitleElement.textContent = event.data.quizTitle || 'Pop Quiz';
-        }
-        showQuestion(); // Refresh the displayed question
+  function getChoiceText(choice) {
+    if (choice == null) return null;
+    if (typeof choice === 'string') return choice;
+    if (typeof choice === 'object') {
+      // common object shapes: {label}, {text}, {value}
+      return choice.label ?? choice.text ?? (choice.value != null ? String(choice.value) : null);
+    }
+    return String(choice);
+  }
+
+  function stopTimer() {
+    if (state.timerHandle) {
+      clearTimeout(state.timerHandle);
+      state.timerHandle = null;
+    }
+    const timerBar = document.getElementById("timer-bar");
+    if (timerBar) {
+      // Freeze where it currently is
+      const width = getComputedStyle(timerBar).width;
+      timerBar.style.transition = 'none';
+      timerBar.style.width = width;
+    }
+  }
+
+  function startTimer() {
+    const timerBar = document.getElementById("timer-bar");
+    if (!timerBar) return;
+
+    // 1) Clear any prior timeout & freeze state BEFORE starting a new run
+    stopTimer();
+
+    // 2) Reset the bar to 0% with no transition
+    timerBar.style.transition = 'none';
+    timerBar.style.width = '0%';
+
+    // 3) Force reflow so the browser commits the reset
+    void timerBar.offsetWidth;
+
+    // 4) Start the animation
+    timerBar.style.transition = `width ${state.timerDuration}s linear`;
+    timerBar.style.width = '100%';
+
+    // 5) Set up the logical timeout to end the quiz
+    state.timerHandle = setTimeout(() => checkAnswer(), state.timerDuration * 1000);
+  }
+
+
+  function clearChoices() {
+    const choicesContainer = document.getElementById("choices-container");
+    if (choicesContainer) choicesContainer.innerHTML = '';
+    const feedback = document.getElementById("feedback");
+    if (feedback) feedback.textContent = '';
+    // Reset timer bar visibility
+    const tbc = document.getElementById("timer-bar-container");
+    if (tbc) tbc.style.display = state.timerOn ? 'block' : 'none';
+  }
+
+  function selectQuestion() {
+    if (!state.questions || state.questions.length === 0) {
+      state.selectedQuestion = null;
+      return;
+    }
+    state.selectedQuestion = state.randomQuestion
+      ? state.questions[Math.floor(Math.random() * state.questions.length)]
+      : state.questions[0];
+  }
+
+  function render() {
+
+    const questionText = document.getElementById("question-text");
+    const tbc = document.getElementById("timer-bar-container");
+
+    if (!state.selectedQuestion) {
+      if (questionText) questionText.textContent = "No questions available. Please wait…";
+      clearChoices();
+      if (tbc) tbc.style.display = 'none';
+      return;
+    }
+
+    // Question text
+    if (questionText) questionText.textContent = state.selectedQuestion.question || '';
+
+    // Choices
+    clearChoices();
+    const choicesContainer = document.getElementById("choices-container");
+    if (choicesContainer && Array.isArray(state.selectedQuestion.choices)) {
+      state.selectedQuestion.choices.forEach((choice, index) => {
+        const button = document.createElement('button');
+        button.className = 'choice';
+        button.textContent = choice;
+        button.onclick = () => checkAnswer(index);
+        choicesContainer.appendChild(button);
+      });
+    }
+
+    // Timer
+    if (state.timerOn && tbc) {
+      tbc.style.display = 'block';
+      stopTimer();       // make sure no stale timeout/transition survives
+      startTimer();      // now begin a fresh run
+    } else if (tbc) {
+      tbc.style.display = 'none';
+      stopTimer();       // optional: also clear if we’re hiding the timer
+    }
+  }
+
+  function applyUpdate(payload) {
+    // Merge & normalize
+    state.analyticsKey    = coalesce(payload.analytics, state.analyticsKey);
+    state.popupID         = coalesce(payload.popupID, state.popupID);
+    state.timerOn         = coalesce(payload.timerOn, state.timerOn);
+    state.timerDuration   = coalesce(payload.timerDuration, state.timerDuration);
+    state.endMessageWin   = coalesce(payload.endMessageWin, state.endMessageWin);
+    state.endMessageLose  = coalesce(payload.endMessageLose, state.endMessageLose);
+    state.randomQuestion  = coalesce(payload.randomQuestion, state.randomQuestion);
+    state.limitResponse   = coalesce(payload.limitResponse, state.limitResponse);
+    state.actionID        = coalesce(payload.actionID, state.actionID);
+    state.activityID      = coalesce(payload.activityID, state.activityID);
+    state.adminUser       = coalesce(payload.adminUser, state.adminUser);
+    state.zoneId          = coalesce(payload.zoneId, state.zoneId);
+    state.isActivity      = !!payload.isActivityComponent;
+    state.options         = coalesce(payload.options, state.options);
+    state.quizTitle       = coalesce(payload.quizTitle, state.quizTitle);
+
+    console.log('[QUIZ PANEL] Current State: ', state);
+
+    // Questions last (depends on shape)
+    const incoming = parseIncomingQuestions(payload);
+    if (incoming.length) state.questions = incoming;
+
+    selectQuestion();
+    stopTimer();
+    render();
+
+    state.gotData = true;
+  }
+
+  function showFeedback(isCorrect) {
+    const feedback = document.getElementById("feedback");
+    if (feedback) feedback.textContent = isCorrect ? state.endMessageWin : state.endMessageLose;
+  }
+
+  function sendAnalytics( quizResult, responseText, correctAnswerText ) {
+    const allCorrect = quizResult === 1;
+
+    parent.postMessage({
+      action: 'send-results',
+      result: quizResult,
+      response: responseText,
+      correctAnswer: correctAnswerText,
+      // --- existing metadata ---
+      analytics: state.analyticsKey,
+      allCorrect,
+      limitResponse: state.limitResponse,
+      actionID: state.actionID,
+      popupID: state.popupID,
+      isActivityComponent: state.isActivity,
+      adminUser: state.adminUser,
+      zoneId: state.zoneId,
+      options: state.options
+    }, '*');
+  }
+
+
+  function checkAnswer(selected) {
+    stopTimer();
+    const choices = document.querySelectorAll(".choice");
+    choices.forEach(choice => (choice.style.pointerEvents = 'none'));
+    if (!state.selectedQuestion) return;
+
+    // highlight correct
+    if (choices[state.selectedQuestion.correct]) {
+      choices[state.selectedQuestion.correct].classList.add('correct-answer');
+    }
+
+    let quizResult, allCorrect;
+    if (selected === state.selectedQuestion.correct) {
+      quizResult = 1; allCorrect = true;
+    } else {
+      if (selected !== undefined && choices[selected]) {
+        choices[selected].classList.add('incorrect-answer');
       }
-    });
-
-
-    function showQuestion() {
-      if (selectedQuestion) {
-        const questionText = document.getElementById("question-text");
-        questionText.textContent = selectedQuestion.question;
-
-        const choicesContainer = document.getElementById("choices-container");
-        choicesContainer.innerHTML = ''; // Clear existing choices
-
-        selectedQuestion.choices.forEach((choice, index) => {
-          const button = document.createElement('button');
-          button.className = 'choice';
-          button.textContent = choice;
-          button.onclick = () => checkAnswer(index);
-          choicesContainer.appendChild(button);
-        });
-
-        const feedback = document.getElementById("feedback");
-        feedback.textContent = "";
-
-        if (timerOn) {
-          document.getElementById("timer-bar-container").style.display = "block";
-          startTimer();
-        } else {
-          document.getElementById("timer-bar-container").style.display = "none";
-        }
-      } else {
-        const questionText = document.getElementById("question-text");
-        questionText.textContent = "No questions available. Please reload the quiz...";
-      }
+      quizResult = 0; allCorrect = false;
     }
 
-     // Function to start the countdown timer
-     function startTimer() {
-      const timerBar = document.getElementById("timer-bar");
-      timerBar.style.transition = 'none';                                               // Disable transition to reset width
-      timerBar.style.width = '0%';                                                      // Reset width to 0%
-      
-      // Force a reflow to apply the initial width immediately
-      timerBar.offsetWidth; 
+    // --- NEW: derive human-readable strings for analytics ---
+    const choiceList = Array.isArray(state.selectedQuestion?.choices) ? state.selectedQuestion.choices : [];
+    const correctIdx  = (state.selectedQuestion?.correct ?? -1);
+    const selectedIdx = (selected ?? null);
 
-      timerBar.style.transition = `width ${timerDuration}s linear`;                     // Set the transition duration
-      timerBar.style.width = '100%';                                                    // Set the width to 100% to trigger the transition
+    const responseText      = (selectedIdx != null && choiceList[selectedIdx] !== undefined)
+      ? getChoiceText(choiceList[selectedIdx])
+      : null;
 
-      clearTimeout(timerInterval);                                                      // Clear any existing timeout
+    const correctAnswerText = (correctIdx >= 0 && choiceList[correctIdx] !== undefined)
+      ? getChoiceText(choiceList[correctIdx])
+      : null;
 
-      timerInterval = setTimeout(() => {
-        checkAnswer();                                                           // Move to the next question if the timer runs out
-      }, timerDuration * 1000);                                                         // Wait for the duration of the timer
-    }
+    const questionText = state.selectedQuestion?.question ?? null;
 
-    // Function to stop the countdown timer
-    function stopTimer() {
-      clearTimeout(timerInterval);                                                      // Clear the timer
-      const timerBar = document.getElementById("timer-bar");
-      const computedStyle = getComputedStyle(timerBar);
-      const width = computedStyle.width;
-      timerBar.style.transition = 'none';                                               // Remove the transition
-      timerBar.style.width = width;                                                     // Set the current width to stop the bar
-    }
+    // Send both numeric indices and text versions
+    sendAnalytics(
+      quizResult,
+      responseText,
+      correctAnswerText
+    );
 
-    function sendAnalytics(quizResult) {
-      const allCorrect = quizResult === 1;
-      parent.postMessage({ 
-          action: 'send-results', 
-          result: quizResult,
-          analytics: analyticsKey,
-          allCorrect: allCorrect,
-          limitResponse: limitResponse,
-          actionID: actionID,
-          popupID: popupID,
-          isActivityComponent: IS_ACTIVITY,
-          adminUser,
-          zoneID,
-          options
-        }, '*');
-    }
+    console.log('[QUIZ PANEL] Send Analytics: ', { quizResult, responseText, correctAnswerText });
+    showFeedback(allCorrect);
+  }
 
-    function checkAnswer(selected) {
-      stopTimer(); // Stop the timer when an answer is checked
+  //  ---  Messaging  ---  //
 
-      const choices = document.querySelectorAll(".choice");
+  function handleMessage(event) {
+    console.log('[QUIZ PANEL] Message Recieved: ', event);
+    const data = event?.data || {};
+    if (data.action !== 'update-quiz') return;
+    applyUpdate(data);
+  }
+  window.addEventListener('message', handleMessage);
 
-      // Disable hover effect on all choices
-      choices.forEach(choice => choice.style.pointerEvents = 'none');
+  // --- Handshake & fallback fetch ---
+  window.addEventListener('DOMContentLoaded', () => {
+    // Tell parent we're ready, and immediately request data.
+    parent.postMessage({ action: 'request-quiz', popupID: state.popupID }, '*');
 
-      // Highlight the correct answer
-      choices[selectedQuestion.correct].classList.add('correct-answer');
-
-      let quizResult;
-      let allCorrect;
-      if (selected === selectedQuestion.correct) {
-        quizResult = 1; // Correct answer
-        allCorrect = true;
-      } else {
-        if (selected !== undefined){
-          choices[selected].classList.add('incorrect-answer'); // Highlight the chosen incorrect answer
-        }; // Incorrect answer
-        quizResult = 0;
-        allCorrect = false;
-      }
-
-      sendAnalytics(quizResult);  // Send Analytics
-
-      showFeedback(allCorrect); // Display feedback message
-    }
-
-    function showFeedback(isCorrect) {
-      const feedback = document.getElementById("feedback");
-      feedback.textContent = isCorrect ? endMessageWin : endMessageLose;
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      parent.postMessage({ action: 'quiz-panel-ready' }, '*');
-    });
-
-    // If no questions arrive shortly, ask the parent explicitly
+    // Small retry if nothing arrives very quickly (handles early-missed postMessage)
     setTimeout(() => {
-      if (!questions || questions.length === 0) {
-        parent.postMessage({ action: 'request-quiz', popupID }, '*');
+      if (!state.gotData) {
+        parent.postMessage({ action: 'request-quiz', popupID: state.popupID }, '*');
       }
-    }, 800);
-  </script>
+    }, 1000);
+  });
+</script>
+
 </body>
 
 

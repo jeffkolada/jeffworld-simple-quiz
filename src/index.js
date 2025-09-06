@@ -16,7 +16,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             name: 'Quiz Multiple Questions',
             description: 'Creates a multiple-choice quiz when the object is clicked.',
             settings: obj => [
-                { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },  
+                { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON string representing quiz questions and choices.' },
             { id: 'section-end-message', name: 'Quiz Game Over Messages', type: 'section' },
                 { id: 'endMessageWin', name: 'Game Over Win', type: 'textarea', help: 'Message to display at the end when user gets all the answers correct.', default: 'Congratulations! You answered all questions correctly!' },
@@ -69,28 +69,33 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
     // When quiz is finished, send Analytics event with Results
     async onMessage(msg) {
-      console.log('Message received in Quiz plugin: ', msg);
-        if (msg.action == 'send-results') {
-
+      console.log('[QUIZ BASEPLUGIN] onMessage : ', msg);
+      const { action, result, response, correctAnswer, analytics, allCorrect, limitResponse, actionID, popupID, IS_ACTIVITY, adminUser, zoneId, options} = msg; 
+      
+      if (msg.action == 'send-results') {
             // ACTIVITY COMPONENT
             if (msg.isActivityComponent) {
                 const respondingUserId = await this.user.getID();
+                options.response = response;
+                options.correctAnswer = correctAnswer;
 
                 const payload = {
                     activityType    : 'quiz',
-                    activityID      : msg.actionID,
-                    adminUser       : msg.adminUser,
-                    zoneId          : msg.zoneId        || null,
-                    options         : msg.options       || {},
+                    activityID      : actionID,
+                    adminUser       : adminUser,
+                    zoneId          : zoneId        || null,
+                    options         : options       || {},
                     respondingUserId,
-                    response        : msg.result
+                    result          : msg.result,
+                    response        : response,
+                    correctAnswer   : correctAnswer,
                 }
                 this.hooks.trigger('activity-response', payload);
 
                 // Optionally close the popup quickly (to match original behavior)
-                if (msg.popupID) setTimeout(() => this.menus.closePopup(msg.popupID), 200);
+                if (msg.popupID) setTimeout(() => this.menus.closePopup(msg.popupID), 3000);
 
-                return; // ← IMPORTANT: do NOT run the old analytics / completion path
+                return; // ← IMPORTANT: do NOT run the old analytics
             }
 
             // STANDARD QUIZ
@@ -151,7 +156,7 @@ class QuizComponent extends BaseComponent {
         }
 
         if (this.isPopupOpen) {
-//            console.log('Popup is already open'); // Prevent opening another popup
+//            console.log('[QUIZ ACTIVITY] Popup is already open'); // Prevent opening another popup
             return;
         }
 
@@ -165,19 +170,19 @@ class QuizComponent extends BaseComponent {
             const timerOn = this.getField('timerOn'); // Retrieve the timer status
             const timerDuration = this.getField('timerDuration'); // Retrieve the timer duration
             const actionID = this.getField('action-id'); // Retrieve the action ID
-//            console.log('Panel Opened');                                                                  // Console Log ()
+//            console.log('[QUIZ ACTIVITY] Panel Opened');                                                                  // Console Log ()
             
             this.isPopupOpen = true; // Set the flag to true
 
             let propertyTaken = await this.plugin.user.getProperty('', 'quiz' + analyticsKey);
-//            console.log('Property Taken:', propertyTaken);
+//            console.log('[QUIZ ACTIVITY] Property Taken:', propertyTaken);
 
-            const popupId = await this.plugin.menus.displayPopup({
+            const popupID = await this.plugin.menus.displayPopup({
                 title: 'Multiple Choice Quiz',
                 panel: {
                     iframeURL: this.paths.absolute('./quiz-panel.html'),
-                    width: 600,
-                    height: 650,
+                    width: 500,
+                    height: 500,
                     onClose: () => {
 //                        console.log("Popup closed");
                         this.isPopupOpen = false; // Reset the flag when the popup is closed
@@ -197,7 +202,7 @@ class QuizComponent extends BaseComponent {
                     endMessageLose: endMessageLose, // Include the lose message in the message
                     timerOn: true, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
-                    popupID: popupId,
+                    popupID: popupID,
                     actionID: actionID
                 });
             }, 600); // Delaying the message to ensure the iframe is fully loaded
@@ -239,6 +244,7 @@ class SingleQuizComponent extends BaseComponent {
         let quizTakenName = 'quiz' + this.getField('analyticsKey'); 
         let properties = await this.plugin.user.getProperty('', quizTakenName);
         let gameOverModal = this.getField('gameOverModal');
+        let options = {};
 
         // If property is undefined, set it to false and retry
         if (properties === undefined) {
@@ -276,12 +282,12 @@ class SingleQuizComponent extends BaseComponent {
             
             this.isPopupOpen = true; // Set the flag to true
 
-            const popupId = await this.plugin.menus.displayPopup({
+            const popupID = await this.plugin.menus.displayPopup({
                 title: 'Popup Quiz',
                 panel: {
                     iframeURL: this.paths.absolute('./quiz-panel-singlequestion.html'),
-                    width: 600,
-                    height: 650,
+                    width: 500,
+                    height: 500,
                     onClose: () => {
 //                        console.log("Popup closed");
                         this.isPopupOpen = false; // Reset the flag when the popup is closed
@@ -302,7 +308,8 @@ class SingleQuizComponent extends BaseComponent {
                     endMessageLose: endMessageLose, // Include the lose message in the message
                     timerOn: timerOn, // Include the timer status in the message
                     timerDuration: timerDuration, // Include the timer duration in the message
-                    popupID: popupId,
+                    options: options,
+                    popupID: popupID,
                     actionID: actionID
                 });
             }, 500); // Delaying the message to ensure the iframe is fully loaded
@@ -348,7 +355,7 @@ class SingleQuizActivityComponent extends BaseComponent {
         if (cid && !cid.endsWith(`:${this.constructor.id}`)) return null;
         if (payload?.zoneId && payload.zoneId !== this.objectID) return null;
 
-        console.log('[ALERTNESS] describe called on', this.objectID || '(no object)', 'returns type=alertness');
+        console.log('[QUIZ ACTIVITY] describe called on', this.objectID || '(no object)', 'returns type=alertness');
         return {
         // REQUIRED
         type: 'simplequiz',
@@ -448,40 +455,55 @@ class SingleQuizActivityComponent extends BaseComponent {
         // END ACTIVITY DATA
 
         const { activityID, adminUser, zoneId, options = {} } = payload;
+
+        // The quiz plugin’s own action/trigger id (unchanged semantics)
         console.log('[QUIZ ACTIVITY] Started with options:', options);
 
         // Build the quiz content from Manager options
         const content = this.buildQuestionsFromOptions(options);
-        console.log('[QUIZ ACTIVITY] BuildQuestionsFromOptions Start: ', content);
-
-        // Decide timer flags for the panel
-        const durationMs   = Math.max(1, Number(options.duration || 6000));
-        const timerOn      = true;                 // panel expects a boolean; we turn it on when duration is provided
-        const timerDuration= (durationMs/1000);
-
-        // Reasonable fallbacks for other panel-required keys
+        const durationMs     = Math.max(1, Number(options.duration || 6000));
+        const timerOn        = true;                 // panel expects a boolean; we turn it on when duration is provided
+        const timerDuration  = (durationMs/1000);
         const randomQuestion = false;
         const limitResponse  = false;
         const quizTitle      = String(options.title || 'Quiz');
         const endMessageWin  = 'Congratulations! You answered correctly!';
         const endMessageLose = `Sorry, that's incorrect.`;
         const actionID       = activityID;
+        const isActivityComponent = true;
+
 
         // Open the panel and pass data (replaces getField()-based config)
-        const popupId = await this.plugin.menus.displayPopup({
+        const popupID = await this.plugin.menus.displayPopup({
             title: quizTitle,
             panel: {
             iframeURL: this.paths.absolute('./quiz-panel-singlequestion.html'),
-            width: 600,
-            height: 650,
+            width: 500,
+            height: 500,
             onClose: () => { this.isPopupOpen = false; }
             }
         });
         this.isPopupOpen = true;
 
-        // Send the quiz data to the panel (wait a tick so iframe is ready)
-        setTimeout(() => {
-            this.plugin.menus.postMessage({
+        const panelContent = {
+            content, randomQuestion, 
+            limitResponse, quizTitle, 
+            endMessageWin, endMessageLose, 
+            timerOn, timerDuration,
+            popupID, actionID, activityID,
+            isActivityComponent, adminUser, 
+            zoneId, options
+        }
+        setTimeout(() => {this.updatePanelContent(panelContent)}, 400)
+
+        return true;
+    };
+
+    async updatePanelContent(data) {
+        const {content, randomQuestion, limitResponse, quizTitle, endMessageWin, endMessageLose, timerOn,
+            timerDuration, popupID, actionID, activityID, isActivityComponent, adminUser, zoneId, options} = data; 
+            
+        this.plugin.menus.postMessage({
             action: 'update-quiz',
             content,                 // ← [{ question, choices, correct }]
             randomQuestion,
@@ -491,18 +513,16 @@ class SingleQuizActivityComponent extends BaseComponent {
             endMessageLose,
             timerOn,
             timerDuration,
-            popupID: popupId,
-            actionID: activityID,
+            popupID,
+            actionID,
+            activityID,
             isActivityComponent: true,
-            asminUser: adminUser,
+            adminUser,
             zoneId,
-            options,
+            options
             });
-        }, 400);
-
-        // DO NOT send a response yet — the quiz-panel should post the answer later
-        return true;
-    };
+        console.log('[QUIZ ACTIVITY] Update Panel Content: ', data);
+    }
 
     async sendResponse(payload, response) {
         const { activityID, adminUser, zoneId, options = {} } = payload;
@@ -523,42 +543,40 @@ class SingleQuizActivityComponent extends BaseComponent {
     }
 
     async onMessage(msg) {
-        if (msg?.action !== 'send-results') return false;
+    console.log('[QUIZ ACTIVITY] Message received in Quiz Activity Component: ', msg);
+        if (msg?.action !== 'send-results') {
 
-        const actionID = String(msg.actionID || '');
-        if (!actionID.startsWith('quiz-')) {        // Only re-route if this quiz was launched by the Activity Manager:
-            return false; // let the third-party plugin handle its non-Activity runs
+            const actionID = String(msg.actionID || '');
+
+            if (!actionID.startsWith('quiz-')) {        // Only re-route if this quiz was launched by the Activity Manager:
+                return false; 
+            }
+
+            const zoneId     = msg.zoneId || this.objectID || null;
+            const options    = msg.options || {}; 
+            const result = msg.result || {};
+            const response = {
+                ...result,
+                allCorrect: !!msg.allCorrect
+            };
+
+            // Emit the standard Activities response (updates counts, archive, etc.)
+            await this.sendResponse(
+                { activityID, adminUser: null, zoneId, options },
+                response
+            );
+
+            // Close the popup (mirrors the third-party plugin behavior)
+            if (msg.popupID) {
+                setTimeout(() => this.plugin.menus.closePopup(msg.popupID), 200);
+            }
+
         }
 
-        // Extract the original activityID we generated in activityStart
-        const activityID = actionID.slice(5); // remove "quiz-"
-        const zoneId     = msg.zoneId || this.objectID || null;
-        const options    = msg.options || {}; // echo-through if the panel included them
-
-        // Normalize a compact response payload for Activities Manager
-        // - If your panel already builds a richer object, you can pass it directly as "response"
-        const result = msg.result || {};
-        const response = {
-            // Preserve what the panel gave you. Common fields you might emit:
-            // selectedIndex: result.selectedIndex ?? null,
-            // correct: !!msg.allCorrect,
-            // raw: result
-            ...result,
-            allCorrect: !!msg.allCorrect
-        };
-
-        // Emit the standard Activities response (updates counts, archive, etc.)
-        await this.sendResponse(
-            { activityID, adminUser: null, zoneId, options },
-            response
-        );
-
-        // Close the popup (mirrors the third-party plugin behavior)
-        if (msg.popupID) {
-            setTimeout(() => this.plugin.menus.closePopup(msg.popupID), 200);
+        if (msg.action === 'request-quiz') {
+            this.updatePanelContent(msg)
         }
-
-        return true;
+    return true;
     }
 
 
