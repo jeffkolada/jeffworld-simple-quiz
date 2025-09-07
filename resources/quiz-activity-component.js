@@ -129,12 +129,13 @@ class SingleQuizActivityComponent extends BaseComponent {
         optionsSchema: {
             type: 'object',
             properties: {
-                title: { type: 'string', title: 'Question', default: 'Which is the Correct Answer?' },
+                title: { type: 'string', title: 'Question', default: 'Which is the Correct Answer?', validate: { required: true, minLength: 3 } },
                 answerChoices: {
                     ui: 'group',
                     type: 'object',
                     title: 'Answer Choices',
                     order: ['A','B','C','D'], // render order
+                    validate: { minNonEmpty: 2 },
                     properties: {
                         A: { type: 'string', default: '',   placeholder: 'Option A' },
                         B: { type: 'string', default: '', placeholder: 'Option B' },
@@ -142,11 +143,10 @@ class SingleQuizActivityComponent extends BaseComponent {
                         D: { type: 'string', default: '',           placeholder: 'Option D (optional)' }
                     }
                     },
-                correctAnswer: { enum: ['A', 'B', 'C', 'D' ], title: 'Correct Answer', default: 'A' },
+                correctAnswer: { enum: ['A', 'B', 'C', 'D' ], title: 'Correct Answer', default: 'A', validate: { inLettersFrom: 'answerChoices'} },
                 duration: { type: 'number', title: 'Duration (ms)', default: 10000, minimum: 1000 }
             }
         },
-
         componentID: `${this.plugin.constructor.id}:${this.constructor.id}`,
         zoneId: this.objectID || null,
         vendor: (this.plugin && this.plugin.constructor && this.plugin.constructor.id) || null
