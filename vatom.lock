@@ -10,6 +10,6 @@
   "category": "Games",
   "businessId": "hCsur3Hk00",
   "price": 0,
-  "releaseNotes": "Fix timing so panel content loads first time",
-  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/8c474d40004a6d0967a05a5b64aca1a7/plugin.js"
+  "releaseNotes": "display name for activity plugin",
+  "entrypoint": "https://plugins.vatom.com/hCsur3Hk00/5c4a896d8fef4e6a0cd316a3bbbde8a2/plugin.js"
 }
