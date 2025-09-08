@@ -76,7 +76,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             // ACTIVITY COMPONENT
             if (msg.isActivityComponent) {
                 const respondingUserId = await this.user.getID();
-                options.response = response;
+                const respondingUserName = await this.user.getDisplayName();
                 options.correctAnswer = correctAnswer;
 
                 const payload = {
@@ -86,6 +86,7 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
                     zoneId          : zoneId        || null,
                     options         : options       || {},
                     respondingUserId,
+                    respondingUserName,
                     result          : msg.result,
                     response        : response,
                     correctAnswer   : correctAnswer,
@@ -350,6 +351,7 @@ class SingleQuizActivityComponent extends BaseComponent {
     static name = 'Simple Quiz'
 
     myUserID = null
+    myUserName = null
 
     activityDescribe = (payload = {}) => {
         const cid = payload && payload.componentID;
@@ -447,6 +449,7 @@ class SingleQuizActivityComponent extends BaseComponent {
     activityStart = async (payload) => {
         // ACTIVITY FILTERS & REQUIRED DATA
         const myID = this.myUserID || await this.plugin.user.getID();
+        const myUserName = this.myUserName || await this.plugin.user.getDisplayName();
         const byType = payload?.type === 'simplequiz';
         const byID   = typeof payload?.componentID === 'string' && payload.componentID.endsWith(':activity-simplequiz');
         if (!(byType || byID)) return false;
@@ -528,6 +531,7 @@ class SingleQuizActivityComponent extends BaseComponent {
     async sendResponse(payload, response) {
         const { activityID, adminUser, zoneId, options = {} } = payload;
         const myID = this.myUserID || await this.plugin.user.getID();
+        const myUserName = this.myUserName || await this.plugin.user.getDisplayName();
 
         this.plugin.messages.send({
             action: 'activity-response',
@@ -536,8 +540,9 @@ class SingleQuizActivityComponent extends BaseComponent {
             activityType: 'quiz',
             activityID,
             zoneId,
-            options: { ...options, respondingUserId: myID },
+            options,
             respondingUserId: myID,
+            respondingUserName: myUserName,
             response
             }
         }, true, adminUser);
@@ -546,13 +551,10 @@ class SingleQuizActivityComponent extends BaseComponent {
     async onMessage(msg) {
     console.log('[QUIZ ACTIVITY] Message received in Quiz Activity Component: ', msg);
         if (msg?.action !== 'send-results') {
-
             const actionID = String(msg.actionID || '');
-
             if (!actionID.startsWith('quiz-')) {        // Only re-route if this quiz was launched by the Activity Manager:
                 return false; 
             }
-
             const zoneId     = msg.zoneId || this.objectID || null;
             const options    = msg.options || {}; 
             const result = msg.result || {};
@@ -560,20 +562,14 @@ class SingleQuizActivityComponent extends BaseComponent {
                 ...result,
                 allCorrect: !!msg.allCorrect
             };
-
-            // Emit the standard Activities response (updates counts, archive, etc.)
             await this.sendResponse(
                 { activityID, adminUser: null, zoneId, options },
                 response
             );
-
-            // Close the popup (mirrors the third-party plugin behavior)
             if (msg.popupID) {
                 setTimeout(() => this.plugin.menus.closePopup(msg.popupID), 2000);
             }
-
         }
-
         if (msg.action === 'request-quiz') {
             this.updatePanelContent(msg)
         }
@@ -583,13 +579,14 @@ class SingleQuizActivityComponent extends BaseComponent {
 
     async onLoad() {
     this.myUserID = await this.plugin.user.getID();
+    this.myUserName = await this.plugin.user.getDisplayName();
 
     // Register on the plugin’s hook bus (from a component use `this.plugin.hooks`)
     this.plugin.hooks.addHandler('vatom-activities-start', this.activityStart);
     this.plugin.hooks.addHandler('vatom-activities-info',  this.activityDescribe);
 
     const objId = this.objectID || '(no object id)'
-    console.log('[QUIZ ACTIVITY] Loaded on', objId, 'user', this.myUserID)
+    console.log('[QUIZ ACTIVITY] Loaded on', objId, 'user', this.myUserName)
     console.log('[QUIZ ACTIVITY] onLoad → handlers registered. objectID=', this.objectID || '(no object)')
     }
 
