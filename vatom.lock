@@ -1,7 +1,7 @@
 {
   "id": "jeffworldquiz",
   "name": "Simple Quiz",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "beta": true,
   "pluginType": "Business",
   "description": "Attach a simple quiz popup to any object.",
