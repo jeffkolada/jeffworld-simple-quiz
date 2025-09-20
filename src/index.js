@@ -363,7 +363,7 @@ class SingleQuizActivityComponent extends BaseComponent {
         title: 'Which answer is correct?',
         shortTitle: 'Quiz',
         description: 'A simple multiple-choice quiz',
-        icon: this.paths.absolute('icons/quiz.svg'),   // put an icon file if you have one
+        icon: this.paths.absolute('icon-quiz.png'),   // put an icon file if you have one
         supportsDuration: true,
         optionsSchema: {
             type: 'object',
