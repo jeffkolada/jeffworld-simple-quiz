@@ -3,12 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Multiple Question Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap">
     <style>
-      @font-face {
-          font-family: 'Outfit';
-          src: url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-      }
-
       body { font-family: 'Outfit', sans-serif; background-color: #000000; color: aliceblue; margin: 0; box-sizing: border-box; height: 100vh; display: flex; justify-content: center; text-align: center; }
       .quiz-container { box-sizing: border-box; width: calc(100% - 50px); max-width: 600px; padding: 2em; border-radius: 20px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); height: calc(100% - 50px); display: flex; flex-direction: column; justify-content: center; align-items: center; }
       h1 { margin-top: 15px; margin-bottom: 10px; }
@@ -25,7 +22,8 @@
       .quiz-title { text-align: center; }
       .timer-bar-container { position: relative; height: 5px; width: 100%; margin-bottom: 20px; margin-top: 25px; }
       .timer-bar-background { position: absolute; top: 0; left: 0; height: 5px; width: 100%; background-color: rgba(255, 255, 255, 0.10); opacity: 100; border-radius: 2px; }
-      .timer-bar { position: absolute; top: 0; left: 0; height: 5px; background-color: rgb(170, 170, 170); width: 0%; border-radius: 2px; transition: width linear; } 
+      .timer-bar { position: absolute; top: 0; left: 0; height: 5px; background-color: rgb(170, 170, 170); width: 0%; border-radius: 2px; transition: width linear; }
+      .explanation-text { font-size: 0.88em; color: rgba(255,255,255,0.55); margin-top: 8px; min-height: 1.2em; font-style: italic; text-wrap: balance; }
 </style>
 </head>
 <body>
@@ -44,6 +42,7 @@
         <div class="feedback-background"></div>
         <p id="feedback" class="feedback-content"></p>
       </div>
+      <p id="explanation" class="explanation-text"></p>
     </div>
   </div>
 
@@ -131,6 +130,7 @@
 
         const feedback = document.getElementById("feedback");
         feedback.textContent = "";
+        document.getElementById("explanation").textContent = "";
 
         const tbc = document.getElementById("timer-bar-container");
         if (timerOn) {
@@ -187,6 +187,9 @@
       } else {
         feedback.textContent = "Incorrect!";
       }
+
+      const explanationEl = document.getElementById("explanation");
+      if (explanationEl) explanationEl.textContent = questions[currentQuestion].explanation || '';
 
       setTimeout(() => {
         // Remove the highlight and re-enable the hover effect after 1.5s and move to the next question

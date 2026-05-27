@@ -6,15 +6,24 @@ This is a simple multi-question quiz. When the quiz is finished, it can send an 
 
 To customize your quiz, use the format below. There is no limit on the number of questions, however you must use **between two and four** answer options per question.
 
-When choosing the correct answer, start from value 0 for the first answer. In the example below, "Non-Fungible Token" is the correct answer, and the "correct" value is 0. If the second answer is correct, use value of 1.
+When choosing the correct answer, use the 0-based index of the correct choice. In the example below, "Non-Fungible Token" is the correct answer at index **0** (the first choice). If the second answer is correct, use **1**.
 
+Each question supports the following fields:
+
+| Field | Required | Description |
+|---|---|---|
+| `question` | Yes | The question text |
+| `choices` | Yes | Array of 2–4 answer strings |
+| `correct` | Yes | 0-based index of the correct answer |
+| `explanation` | No | Text shown to the user after they answer, explaining why the correct answer is right |
 
 ```json
 [
     {
         "question": "What does NFT stand for?",
         "choices": ["Non-Fungible Token", "New Financial Technology", "National Finance Treaty"],
-        "correct": 0
+        "correct": 0,
+        "explanation": "NFT stands for Non-Fungible Token, a unique digital asset verified on a blockchain."
     },
     {
         "question": "Which blockchain network is commonly used for NFTs?",
@@ -38,6 +47,12 @@ When choosing the correct answer, start from value 0 for the first answer. In th
     }
 ]
 ```
+
+## Answer Explanations
+
+Adding an `"explanation"` to any question displays a short note to the user immediately after they answer, helping them understand why the correct answer is right. The field is optional — questions without it behave exactly as before.
+
+Explanations appear below the Correct / Incorrect feedback and stay visible until the quiz advances to the next question (multi-question mode) or until the popup closes (single-question mode).
 ## Action ID
 When the quiz is completed successfully, an action can be triggered remotely via ActionID. Use the Action Objects plugin to animate this or a separate object when the quiz has completed.
 

@@ -108,7 +108,8 @@
     {
         "question": "What is the largest mammal in the world?",
         "choices": ["Elephant", "Blue Whale", "Giraffe"],
-        "correct": 1
+        "correct": 1,
+        "explanation": "Blue Whales can grow up to 100 feet long, making them the largest animals ever known to exist."
     },
     {
         "question": "Which bird is known for its impressive ability to mimic sounds, including human speech?",
@@ -123,8 +124,9 @@
         <li><b>question:</b> A string representing the quiz question.</li>
         <li><b>choices:</b> An array of strings, each string representing a possible answer choice.</li>
         <li><b>correct:</b> An integer representing the index of the correct answer in the choices array.</li>
+        <li><b>explanation</b> <i>(optional):</i> A string shown to the user after they answer, explaining why the correct answer is right. Leave it out if no explanation is needed.</li>
     </ul>
-    <p> When choosing the correct answer, start from value 0 for the first answer. In the example below, "Blue Whale" is the correct answer, and the "correct" value is 0. If the second answer is correct, use value of 1.
+    <p> When choosing the correct answer, use the 0-based index of the correct choice. In the first example above, "Blue Whale" is the correct answer at index <b>1</b> (Elephant = 0, Blue Whale = 1, Giraffe = 2). If the first answer is correct, use <b>0</b>.
         </p>
     
         <h2>Action ID</h2>
