@@ -6,7 +6,9 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
     static name = "Multiple Choice Quiz Plugin";
     static description = "Creates a multiple-choice quiz when the component is clicked.";
 
-    _pendingQuizData = null;
+    _pendingQuizData    = null;
+    _pendingBuilderData = null;
+    _builderComponent   = null;
 
     onLoad() {
         this.objects.registerComponent(QuizComponent, {
@@ -16,6 +18,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Multiple Choice Quiz' },
                 { id: 'questions', name: 'Questions', type: 'textarea', help: 'JSON array of question objects. Each object needs "question", "choices", and "correct" (0-based index). Optional: "explanation".' },
+                { id: 'section-builder', name: 'Visual Quiz Builder', type: 'section' },
+                { id: 'question-builder', name: 'Open Quiz Builder', type: 'button', help: 'Visually create and edit questions — saves back to the Questions field.' },
                 ...buildSharedSettings({
                     endMessageWin:  'Congratulations! You answered all questions correctly!',
                     endMessageLose: 'Keep practicing to improve your score.'
@@ -30,6 +34,8 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
             settings: obj => [
                 { id: 'quizTitle', name: 'Quiz Title', type: 'text', help: 'Title of the quiz.', default: 'Pop Quiz' },
                 { id: 'questions', name: 'Question', type: 'textarea', help: 'JSON array of question objects. By default the first question is used. Each object needs "question", "choices", and "correct" (0-based index). Optional: "explanation".' },
+                { id: 'section-builder', name: 'Visual Quiz Builder', type: 'section' },
+                { id: 'question-builder', name: 'Open Quiz Builder', type: 'button', help: 'Visually create and edit questions — saves back to the Questions field.' },
                 { id: 'question-random', name: 'Randomize Question', type: 'checkbox', help: 'If multiple questions are provided, this will randomize the single question that appears.', default: false },
                 ...buildSharedSettings({
                     endMessageWin:  'Congratulations! You answered correctly!',
@@ -51,6 +57,28 @@ export default class MultipleChoiceQuizPlugin extends BasePlugin {
 
         if (msg.action === 'request-quiz') {
             if (this._pendingQuizData) this.menus.postMessage(this._pendingQuizData);
+            return;
+        }
+
+        if (msg.action === 'request-builder') {
+            if (this._builderComponent && this._pendingBuilderData) {
+                const freshJson = this._builderComponent.getField('questions') || '[]';
+                this.menus.postMessage({ ...this._pendingBuilderData, questionsJson: freshJson });
+            }
+            return;
+        }
+
+        if (msg.action === 'save-quiz-builder') {
+            if (this._builderComponent) {
+                try {
+                    this._builderComponent.setField('questions', msg.questionsJson);
+                } catch (e) {
+                    console.warn('[QUIZ BUILDER] setField unavailable — JSON not written back automatically.', e);
+                }
+                this._builderComponent   = null;
+                this._pendingBuilderData = null;
+            }
+            if (msg.popupID) this.menus.closePopup(msg.popupID);
             return;
         }
 
@@ -187,6 +215,29 @@ class QuizBaseComponent extends BaseComponent {
                     onClose: () => {},
                 }
             });
+        }
+
+        if (id === 'question-builder') {
+            const currentJson = this.getField('questions') || '[]';
+            this.plugin._builderComponent = this;
+            // Set before await so request-builder fired during displayPopup can be answered
+            this.plugin._pendingBuilderData = { action: 'load-builder', questionsJson: currentJson, popupID: null };
+
+            const popupID = await this.plugin.menus.displayPopup({
+                title: 'Quiz Builder',
+                panel: {
+                    iframeURL: this.paths.absolute('./quiz-builder.html'),
+                    width: 680,
+                    height: 700,
+                    onClose: () => {
+                        this.plugin._builderComponent   = null;
+                        this.plugin._pendingBuilderData = null;
+                    },
+                }
+            });
+
+            this.plugin._pendingBuilderData.popupID = popupID;
+            setTimeout(() => this.plugin.menus.postMessage(this.plugin._pendingBuilderData), 1250);
         }
     }
 }

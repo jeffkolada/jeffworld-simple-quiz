@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #111;
+            color: #e0e0e0;
+            margin: 0; padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .scroll-area { flex: 1; overflow-y: auto; padding: 16px 20px 8px; }
+
+        /* ---- Editor card ---- */
+        .editor-card {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .card-heading {
+            font-size: 0.8em;
+            font-weight: 500;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 0 0 12px;
+        }
+
+        label { display: block; font-size: 0.82em; color: #888; margin-bottom: 4px; }
+        .optional-hint { color: #555; }
+
+        input[type=text] {
+            width: 100%;
+            background: #2a2a2a;
+            border: 1px solid #383838;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9em;
+            padding: 7px 10px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input[type=text]:focus { border-color: #555; }
+
+        .field-row { margin-bottom: 10px; }
+
+        /* Answer grid: 2-column on wider panels */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .answer-row { display: flex; align-items: center; gap: 6px; }
+        .answer-row .answer-letter {
+            font-size: 0.78em;
+            color: #666;
+            width: 14px;
+            flex-shrink: 0;
+        }
+        .answer-input-wrap { position: relative; flex: 1; }
+        .answer-input-wrap input[type=text] { width: 100%; padding-right: 32px; }
+        .answer-input-wrap input[type=radio] {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            accent-color: #4a9eff;
+            width: 15px; height: 15px;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.88em;
+            padding: 7px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .btn-primary { background: #4a9eff; color: #fff; }
+        .btn-primary:hover { background: #3a8eef; }
+        .btn-secondary { background: #2e2e2e; color: #bbb; }
+        .btn-secondary:hover { background: #383838; }
+        .btn-sm-edit {
+            background: transparent; color: #999;
+            border: 1px solid #3a3a3a;
+            padding: 3px 9px; font-size: 0.78em; border-radius: 5px;
+        }
+        .btn-sm-edit:hover { background: #2a2a2a; }
+        .btn-sm-del {
+            background: transparent; color: #c95555;
+            border: 1px solid #c95555;
+            padding: 3px 9px; font-size: 0.78em; border-radius: 5px;
+        }
+        .btn-sm-del:hover { background: rgba(201,85,85,0.12); }
+
+        .editor-actions { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+        .status-msg { font-size: 0.8em; color: #e05555; }
+
+        /* ---- Accordion ---- */
+        .accordion-header-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .accordion-header-row .card-heading { margin: 0; }
+        .q-count { font-size: 0.8em; color: #555; }
+
+        .empty-msg { color: #555; font-size: 0.85em; font-style: italic; padding: 4px 0 8px; }
+
+        .accordion-item {
+            background: #1e1e1e;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            overflow: hidden;
+        }
+        .accordion-trigger {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            cursor: pointer;
+            gap: 7px;
+            user-select: none;
+        }
+        .accordion-trigger:hover { background: #242424; }
+
+        .chevron {
+            color: #555;
+            font-size: 0.7em;
+            transition: transform 0.18s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .accordion-item.open .chevron { transform: rotate(90deg); }
+
+        .acc-num { font-size: 0.75em; color: #666; flex-shrink: 0; }
+        .acc-title {
+            flex: 1;
+            font-size: 0.88em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .acc-btns { display: flex; gap: 5px; flex-shrink: 0; }
+
+        .accordion-body {
+            display: none;
+            padding: 8px 12px 12px;
+            border-top: 1px solid #272727;
+        }
+        .accordion-item.open .accordion-body { display: block; }
+
+        .detail-row { font-size: 0.85em; margin-bottom: 5px; display: flex; gap: 5px; }
+        .detail-label { color: #666; flex-shrink: 0; }
+        .correct-mark { color: #4caf50; font-weight: 600; }
+        .explanation-val { font-style: italic; color: #aaa; }
+
+        /* ---- Footer ---- */
+        .footer {
+            padding: 10px 20px;
+            border-top: 1px solid #1e1e1e;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+            background: #111;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 7px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+    </style>
+</head>
+<body>
+
+<div class="scroll-area">
+
+    <!-- Editor -->
+    <div class="editor-card">
+        <p class="card-heading" id="editor-heading">Add Question</p>
+
+        <div class="field-row">
+            <label>Question</label>
+            <input type="text" id="q-text" placeholder="Enter your question…">
+        </div>
+
+        <div class="answers-grid">
+            <div class="answer-row">
+                <span class="answer-letter">A</span>
+                <div class="answer-input-wrap">
+                    <input type="text" id="a0" placeholder="Answer A">
+                    <input type="radio" name="correct" value="0" title="Mark A as correct">
+                </div>
+            </div>
+            <div class="answer-row">
+                <span class="answer-letter">B</span>
+                <div class="answer-input-wrap">
+                    <input type="text" id="a1" placeholder="Answer B">
+                    <input type="radio" name="correct" value="1" title="Mark B as correct">
+                </div>
+            </div>
+            <div class="answer-row">
+                <span class="answer-letter">C</span>
+                <div class="answer-input-wrap">
+                    <input type="text" id="a2" placeholder="Answer C (optional)">
+                    <input type="radio" name="correct" value="2" title="Mark C as correct">
+                </div>
+            </div>
+            <div class="answer-row">
+                <span class="answer-letter">D</span>
+                <div class="answer-input-wrap">
+                    <input type="text" id="a3" placeholder="Answer D (optional)">
+                    <input type="radio" name="correct" value="3" title="Mark D as correct">
+                </div>
+            </div>
+        </div>
+
+        <div class="field-row">
+            <label>Explanation <span class="optional-hint">(optional — shown to user after answering)</span></label>
+            <input type="text" id="q-explanation" placeholder="Why is the correct answer right?">
+        </div>
+
+        <div class="editor-actions">
+            <button class="btn btn-primary" id="btn-submit" onclick="submitQuestion()">Add Question</button>
+            <button class="btn btn-secondary" id="btn-cancel" style="display:none" onclick="cancelEdit()">Cancel</button>
+            <span class="status-msg" id="status-msg"></span>
+        </div>
+    </div>
+
+    <!-- Accordion list -->
+    <div>
+        <div class="accordion-header-row">
+            <p class="card-heading">Questions</p>
+            <span class="q-count" id="q-count"></span>
+        </div>
+        <div id="accordion-list"></div>
+        <p class="empty-msg" id="empty-msg">No questions yet — add one above.</p>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <button class="btn btn-secondary" onclick="copyJSON(this)">Copy JSON</button>
+    <button class="btn btn-primary" onclick="saveAndClose()">Save to Quiz</button>
+</div>
+
+<script>
+    let questions  = [];
+    let editingIdx = null;
+    let popupID    = null;
+
+    // ---------- Render ----------
+
+    function render() {
+        const count    = questions.length;
+        const list     = document.getElementById('accordion-list');
+        const emptyMsg = document.getElementById('empty-msg');
+
+        document.getElementById('q-count').textContent = count ? `(${count})` : '';
+        emptyMsg.style.display = count === 0 ? 'block' : 'none';
+
+        if (count === 0) {
+            list.innerHTML = '';
+            return;
+        }
+
+        // Preserve which items were open before re-render
+        const openIdxs = new Set(
+            [...list.querySelectorAll('.accordion-item.open')].map(el => el.dataset.idx)
+        );
+
+        list.innerHTML = '';
+        questions.forEach((q, i) => {
+            list.appendChild(buildItem(q, i, openIdxs.has(String(i))));
+        });
+    }
+
+    function buildItem(q, i, open) {
+        const item = document.createElement('div');
+        item.className = 'accordion-item' + (open ? ' open' : '');
+        item.dataset.idx = i;
+
+        // Trigger row
+        const trigger = document.createElement('div');
+        trigger.className = 'accordion-trigger';
+        trigger.innerHTML = `
+            <span class="chevron">&#9658;</span>
+            <span class="acc-num">Q${i + 1}.</span>
+            <span class="acc-title">${esc(q.question)}</span>
+        `;
+        trigger.addEventListener('click', () => item.classList.toggle('open'));
+
+        const btns = document.createElement('div');
+        btns.className = 'acc-btns';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-sm-edit';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = e => { e.stopPropagation(); startEdit(i); };
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-sm-del';
+        delBtn.textContent = 'Delete';
+        delBtn.onclick = e => { e.stopPropagation(); deleteQuestion(i); };
+
+        btns.appendChild(editBtn);
+        btns.appendChild(delBtn);
+        trigger.appendChild(btns);
+
+        // Body
+        const body = document.createElement('div');
+        body.className = 'accordion-body';
+
+        q.choices.forEach((choice, ci) => {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            const isCorrect = ci === q.correct;
+            row.innerHTML = `<span class="detail-label">${'ABCD'[ci]}.</span>
+                ${isCorrect ? '<span class="correct-mark">&#10003; </span>' : ''}${esc(choice)}`;
+            body.appendChild(row);
+        });
+
+        if (q.explanation) {
+            const expRow = document.createElement('div');
+            expRow.className = 'detail-row';
+            expRow.innerHTML = `<span class="detail-label">Note:</span>
+                <span class="explanation-val">${esc(q.explanation)}</span>`;
+            body.appendChild(expRow);
+        }
+
+        item.appendChild(trigger);
+        item.appendChild(body);
+        return item;
+    }
+
+    // ---------- Editor ----------
+
+    function clearEditor() {
+        document.getElementById('q-text').value = '';
+        ['a0','a1','a2','a3'].forEach(id => { document.getElementById(id).value = ''; });
+        document.querySelectorAll('input[name=correct]').forEach(r => r.checked = false);
+        document.getElementById('q-explanation').value = '';
+        document.getElementById('status-msg').textContent = '';
+    }
+
+    function populateEditor(q) {
+        document.getElementById('q-text').value = q.question || '';
+        ['a0','a1','a2','a3'].forEach((id, i) => {
+            document.getElementById(id).value = q.choices[i] || '';
+        });
+        document.querySelectorAll('input[name=correct]').forEach(r => {
+            r.checked = parseInt(r.value) === q.correct;
+        });
+        document.getElementById('q-explanation').value = q.explanation || '';
+    }
+
+    function startEdit(i) {
+        editingIdx = i;
+        populateEditor(questions[i]);
+        document.getElementById('editor-heading').textContent = `Edit Question ${i + 1}`;
+        document.getElementById('btn-submit').textContent = 'Update Question';
+        document.getElementById('btn-cancel').style.display = 'inline-block';
+        document.getElementById('q-text').focus();
+        document.querySelector('.editor-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        editingIdx = null;
+        clearEditor();
+        document.getElementById('editor-heading').textContent = 'Add Question';
+        document.getElementById('btn-submit').textContent = 'Add Question';
+        document.getElementById('btn-cancel').style.display = 'none';
+    }
+
+    function submitQuestion() {
+        const questionText = document.getElementById('q-text').value.trim();
+        if (!questionText) { showStatus('Question text is required.'); return; }
+
+        // Gather raw slot values
+        const raw = ['a0','a1','a2','a3'].map(id => document.getElementById(id).value.trim());
+        const choices = raw.filter(v => v);
+        if (choices.length < 2) { showStatus('At least 2 answers are required.'); return; }
+
+        // Correct radio maps to the raw slot index; remap to filtered index
+        const radio = document.querySelector('input[name=correct]:checked');
+        if (!radio) { showStatus('Please select the correct answer.'); return; }
+        const rawIdx = parseInt(radio.value);
+        if (!raw[rawIdx]) { showStatus('The selected correct answer is empty.'); return; }
+        const correct = choices.indexOf(raw[rawIdx]);
+
+        const explanation = document.getElementById('q-explanation').value.trim();
+        const q = { question: questionText, choices, correct };
+        if (explanation) q.explanation = explanation;
+
+        if (editingIdx !== null) {
+            questions[editingIdx] = q;
+            cancelEdit();
+        } else {
+            questions.push(q);
+            clearEditor();
+        }
+        render();
+    }
+
+    function deleteQuestion(i) {
+        if (editingIdx === i) cancelEdit();
+        else if (editingIdx !== null && editingIdx > i) editingIdx--;
+        questions.splice(i, 1);
+        render();
+    }
+
+    function showStatus(msg) {
+        const el = document.getElementById('status-msg');
+        el.textContent = msg;
+        setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 3000);
+    }
+
+    // ---------- Save / Copy ----------
+
+    function getJSON() {
+        return JSON.stringify(questions, null, 4);
+    }
+
+    function copyJSON(btn) {
+        navigator.clipboard.writeText(getJSON()).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+        });
+    }
+
+    function saveAndClose() {
+        parent.postMessage({ action: 'save-quiz-builder', questionsJson: getJSON(), popupID }, '*');
+    }
+
+    // ---------- Messaging ----------
+
+    window.addEventListener('message', event => {
+        const data = event?.data || {};
+        if (data.action !== 'load-builder') return;
+        popupID = data.popupID ?? null;
+        try {
+            const parsed = JSON.parse(data.questionsJson || '[]');
+            questions = Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+            questions = [];
+        }
+        render();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        parent.postMessage({ action: 'request-builder', popupID: null }, '*');
+        setTimeout(() => {
+            if (questions.length === 0)
+                parent.postMessage({ action: 'request-builder', popupID: null }, '*');
+        }, 2500);
+        render();
+    });
+
+    // ---------- Utilities ----------
+
+    function esc(str) {
+        return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
+</body>
+</html>
